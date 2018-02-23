@@ -4,7 +4,7 @@
     <string name="global_appName">Util3D</string>
 
     <!-- LoginFragment Strings -->
-    <string name="s_fragment_login_editText_hint_username">Username or Email</string>
+    <string name="s_fragment_login_editText_hint_username">Email</string>
     <string name="s_fragment_login_editText_hint_password">Password</string>
     <string name="s_fragment_login_button_text_login">Login</string>
     <string name="s_fragment_login_button_text_forgotPassword">Forgot Password</string>
@@ -34,8 +34,11 @@
 
     <!-- ForgotPassword Dialog Strings -->
     <string name="s_dialog_forgotPassword_title">Forgot Password</string>
-    <string name="s_dialog_forgotPassword_textEdit_securityQuestion">What is your Mother\'s maiden name?</string>
-    <string name="s_dialog_forgotPassword_editText_hint_securityAnswer">Security Answer</string>
+    <string name="s_dialog_forgotPassword_textEdit_emailInstructions">Enter your email to receive a password reset email:</string>
+    <string name="s_dialog_forgotPassword_editText_hint_email">Email</string>
+    <string name="s_dialog_forgotPassword_button_sendEmail">Send reset email</string>
+    <string name="s_dialog_forgotPassword_button_cancel">Cancel</string>
+    <string name="s_dialog_forgotPassword_successMessage">Reset email sent</string>
 
     <!-- DashboardFragment Strings -->
     <string name="s_fragment_dashboard_textView_filesPlaceholder">Files Fragment goes here.</string>
@@ -47,13 +50,47 @@
 
     <!-- SettingsFragment Strings -->
     <string name="s_fragment_settings_title">Settings</string>
-    <string name="s_fragment_settings_editText_hint_updateUsername">New Username</string>
-    <string name="s_fragment_settings_editText_hint_updateEmail">New Email</string>
-    <string name="s_fragment_settings_editText_hint_updatePassword">New Password</string>
-    <string name="s_fragment_settings_editText_hint_updateSecurityQuestion">New Security Question</string>
-    <string name="s_fragment_settings_editText_hint_updateSecurityAnswer">New Security Answer</string>
-    <string name="s_fragment_settings_switch_label_useSSO">Use SSO</string>
-    <string name="s_fragment_settings_button_save">Save</string>
+    <string name="s_fragment_settings_button_changePassword">Change Password</string>
+    <string name="s_fragment_settings_button_changeEmail">Change Email</string>
+    <string name="s_fragment_settings_button_changeUsername">Change Username</string>
+    <string name="s_fragment_settings_button_deleteAccount">Delete Account</string>
+
+    <!-- ChangePassword Dialog Strings -->
+    <string name="s_dialog_changePassword_title">Change Password</string>
+    <string name="s_dialog_changePassword_editText_hint_currentPassword">Current Password</string>
+    <string name="s_dialog_changePassword_editText_hint_newPassword">New Password</string>
+    <string name="s_dialog_changePassword_editText_hint_repeatNewPassword">Repeat New Password</string>
+    <string name="s_dialog_changePassword_cancelButton">Cancel</string>
+    <string name="s_dialog_changePassword_changePasswordButton">Change Password</string>
+    <string name="s_dialog_changePassword_errorMessage_PasswordsNotMatching">Passwords do not match</string>
+    <string name="s_dialog_changePassword_successMessage">Password changed successfully</string>
+
+    <!-- ChangeEmail Dialog Strings -->
+    <string name="s_dialog_changeEmail_title">Change Email</string>
+    <string name="s_dialog_changeEmail_editText_hint_currentPassword">Verify Current Password</string>
+    <string name="s_dialog_changeEmail_editText_hint_newEmail">New Email</string>
+    <string name="s_dialog_changeEmail_editText_hint_repeatNewEmail">Repeat New Email</string>
+    <string name="s_dialog_changeEmail_cancelButton">Cancel</string>
+    <string name="s_dialog_changeEmail_changeEmailButton">Change Email</string>
+    <string name="s_dialog_changeEmail_errorMessage_EmailsNotMatching">Emails do not match</string>
+    <string name="s_dialog_changeEmail_successMessage">Email changed successfully</string>
+    <string name="s_dialog_changeEmail_currentEmailLabel">Current Email:</string>
+
+    <!-- ChangeUsername Dialog Strings -->
+    <string name="s_dialog_changeUsername_title">Change Username</string>
+    <string name="s_dialog_changeUsername_editText_hint_newUsername">New Username</string>
+    <string name="s_dialog_changeUsername_cancelButton">Cancel</string>
+    <string name="s_dialog_changeUsername_changeUsernameButton">Change Username</string>
+    <string name="s_dialog_changeUsername_successMessage">Username changed successfully</string>
+    <string name="s_dialog_changeUsername_currentUsernameLabel">Current Username:</string>
+
+    <!-- DeleteAccount Dialog Strings -->
+    <string name="s_dialog_deleteAccount_title">Delete Account</string>
+    <string name="s_dialog_deleteAccount_editText_hint_currentPassword">Current Password</string>
+    <string name="s_dialog_deleteAccount_warningLabel">This will permanently delete your account. Are you sure you want to proceed?</string>
+    <string name="s_dialog_deleteAccount_cancelButton">No. Cancel.</string>
+    <string name="s_dialog_deleteAccount_deleteAccountButton">Yes. Delete.</string>
+    <string name="s_dialog_deleteAccount_successMessage">Account Deleted</string>
 
     <!-- CreateProjectFragment Strings -->
     <string name="s_fragment_createProject_title">Create Project</string>
@@ -62,5 +99,14 @@
     <string name="s_fragment_createProject_editText_hint_projectName">Project Name</string>
     <string name="s_fragment_createProject_editText_hint_location">Location</string>
     <string name="s_fragment_createProject_editText_hint_organization">Organization</string>
+    <string-array name="s_fragment_createProject_spinner_utilities">
+        <item>Water</item>
+        <item>Gas</item>
+        <item>Electric</item>
+        <item>Sewage</item>
+    </string-array>
+
+
+
 
 </resources>

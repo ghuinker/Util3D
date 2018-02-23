@@ -30,7 +30,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     Button createAccountButton;
 
     public interface OnSuccessfulLoginListener {
-        void onSuccessfulLogin(String username, String password);
+        void onSuccessfulLogin();
     }
 
     public LoginFragment() {
@@ -74,6 +74,15 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
+    public void onResume(){
+        super.onResume();
+        if(User.getInstance().isAlreadyLoggedIn())
+        {
+            mCallback.onSuccessfulLogin();
+        }
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fragment_login_button_login:
@@ -81,7 +90,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 String password = this.getEditTextValue(passwordEditText);
 
                 if (User.getInstance().validateAndLogin(username, password)) {
-                    mCallback.onSuccessfulLogin(username, password);
+                    mCallback.onSuccessfulLogin();
                 } else {
                     Toast.makeText(this.getContext(), R.string.s_fragment_login_errorMessage_invalidCredentials, Toast.LENGTH_SHORT).show();
                 }
@@ -90,27 +99,34 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 // TODO
 
                 LayoutInflater layoutInflater = LayoutInflater.from(this.getContext());
-                View dialogView = layoutInflater.inflate(R.layout.dialog_forgotpassword, null);
+                final View dialogView = layoutInflater.inflate(R.layout.dialog_forgotpassword, null);
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.getContext());
                 alertDialogBuilder.setTitle(getString(R.string.s_dialog_forgotPassword_title));
                 alertDialogBuilder.setView(dialogView);
                 alertDialogBuilder
-                        .setPositiveButton("Verify",
+                        .setPositiveButton(R.string.s_dialog_forgotPassword_button_sendEmail,
                                 new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        // hello
-                                    }
-                                })
-                        .setNegativeButton("Cancel",
+                                    public void onClick(DialogInterface dialog, int id) {}})
+                        .setNegativeButton(R.string.s_dialog_forgotPassword_button_cancel,
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
                                     }
                                 });
-
-                AlertDialog alertDialog = alertDialogBuilder.create();
+                final AlertDialog alertDialog = alertDialogBuilder.create();
                 alertDialog.show();
-
+                alertDialog.getButton(alertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            User.getInstance().sendPasswordResetEmail(((EditText) dialogView.findViewById(R.id.dialog_forgotPassword_editText_email)).getText().toString());
+                            Toast.makeText(v.getContext(), R.string.s_dialog_forgotPassword_successMessage, Toast.LENGTH_SHORT).show();
+                            alertDialog.dismiss();
+                        } catch (Exception e) {
+                            Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
                 break;
             case R.id.fragment_login_button_createAccount:
                 Fragment createAccountFragment = new CreateAccountFragment();

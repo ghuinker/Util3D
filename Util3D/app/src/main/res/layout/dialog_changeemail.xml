@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialog_changeEmail_linearLayout_main"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp" >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/s_dialog_changeEmail_currentEmailLabel"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginBottom="10dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/dialog_changeEmail_textView_currentEmail"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginBottom="10dp" />
+    <EditText
+        android:hint="@string/s_dialog_changeEmail_editText_hint_currentPassword"
+        android:id="@+id/dialog_changeEmail_editText_currentPassword"
+        android:inputType="textPassword"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent" >
+        <requestFocus />
+    </EditText>
+
+    <EditText
+        android:hint="@string/s_dialog_changeEmail_editText_hint_newEmail"
+        android:id="@+id/dialog_changeEmail_editText_newEmail"
+        android:inputType="text"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent" >
+    </EditText>
+
+    <EditText
+        android:hint="@string/s_dialog_changeEmail_editText_hint_repeatNewEmail"
+        android:id="@+id/dialog_changeEmail_editText_repeatNewEmail"
+        android:inputType="text"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent" >
+    </EditText>
+</LinearLayout>

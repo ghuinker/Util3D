@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.se319s18a9.util3d.LoginActivity;
 import com.se319s18a9.util3d.R;
 import com.se319s18a9.util3d.backend.User;
 
@@ -69,6 +70,8 @@ public class DashboardFragment extends Fragment implements View.OnClickListener 
             case R.id.fragment_dashboard_button_logout:
                 User.getInstance().signOut();
                 Toast.makeText(getContext(), R.string.s_fragment_dashboard_alertMessage_loggedOut, Toast.LENGTH_SHORT).show();
+                //Todo fix to use fragment stack instead of ending activity
+                getActivity().finish();
                 break;
         }
     }

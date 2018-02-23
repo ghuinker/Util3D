@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.se319s18a9.util3d.Fragments.CreateAccountFragment;
 import com.se319s18a9.util3d.Fragments.LoginFragment;
+import com.se319s18a9.util3d.backend.User;
 
 public class LoginActivity extends AppCompatActivity implements
         LoginFragment.OnSuccessfulLoginListener,
@@ -39,15 +40,13 @@ public class LoginActivity extends AppCompatActivity implements
         fragmentTransaction.commit();
     }
 
-    public void onSuccessfulLogin(String name, String password) {
-        // TODO: Login
-        Toast.makeText(this, name + " - " + password, Toast.LENGTH_SHORT).show();
+    public void onSuccessfulLogin() {
         Intent mainActivityIntent = new Intent(this, MainActivity.class);
         startActivity(mainActivityIntent);
     }
 
     public void onAccountCreated(String name, String password) {
-        // TODO: Automatically login
-        Toast.makeText(this, name + " : " + password + " - created", Toast.LENGTH_SHORT).show();
+        onSuccessfulLogin();
+        //Toast.makeText(this, name + " : " + password + " - created", Toast.LENGTH_SHORT).show();
     }
 }

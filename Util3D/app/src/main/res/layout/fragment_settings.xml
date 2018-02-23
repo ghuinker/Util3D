@@ -8,118 +8,59 @@
     tools:context="com.se319s18a9.util3d.Fragments.SettingsFragment">
 
     <TextView
-        android:gravity="center"
+    android:gravity="center"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:layout_marginTop="16dp"
+    android:paddingStart="16sp"
+    android:paddingEnd="16sp"
+    android:layout_width="match_parent"
+    android:text="@string/s_fragment_settings_title"
+    android:textSize="36sp"
+    android:textStyle="bold" />
+
+    <Button
+        android:background="@color/colorAccent"
+        android:id="@+id/fragment_settings_button_changePassword"
+        android:layout_gravity="center"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginTop="16dp"
-        android:paddingStart="16sp"
-        android:paddingEnd="16sp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_width="match_parent"
-        android:text="@string/s_fragment_settings_title"
-        android:textSize="36sp"
-        android:textStyle="bold" />
+        android:text="@string/s_fragment_settings_button_changePassword" />
 
-    <TextView
+    <Button
+        android:background="@color/colorAccent"
+        android:id="@+id/fragment_settings_button_changeEmail"
+        android:layout_gravity="center"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_width="match_parent"
-        android:text="Email: johndoe@example.com"
-        android:textStyle="bold"/>
+        android:text="@string/s_fragment_settings_button_changeEmail" />
 
-    <LinearLayout
+    <Button
+        android:background="@color/colorAccent"
+        android:id="@+id/fragment_settings_button_changeUsername"
+        android:layout_gravity="center"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_width="match_parent"
-        android:weightSum="5"
-        android:orientation="horizontal">
+        android:text="@string/s_fragment_settings_button_changeUsername" />
 
-        <EditText
-            android:hint="@string/s_fragment_settings_editText_hint_updateEmail"
-            android:layout_width="0dp"
-            android:layout_weight="4"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="@string/s_fragment_settings_button_save"/>
-
-    </LinearLayout>
-
-    <TextView
+    <Button
+        android:background="@color/colorAccent"
+        android:id="@+id/fragment_settings_button_deleteAccount"
+        android:layout_gravity="center"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_width="match_parent"
-        android:text="Password: ***"
-        android:textStyle="bold"/>
-
-    <LinearLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:weightSum="5"
-        android:orientation="horizontal">
-
-        <EditText
-            android:hint="@string/s_fragment_settings_editText_hint_updatePassword"
-            android:layout_width="0dp"
-            android:layout_weight="4"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="@string/s_fragment_settings_button_save"/>
-
-    </LinearLayout>
-
-    <View
-        android:layout_height="16dp"
-        android:layout_width="match_parent" />
-
-    <LinearLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:weightSum="5"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="4"
-            android:layout_height="wrap_content"
-            android:text="Enable Dark Theme"
-            android:textSize="20sp" />
-
-        <Switch
-            android:id="@+id/fragment_settings_switch_enableDarkTheme"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:layout_weight="1" />
-
-    </LinearLayout>
-
-    <View
-        android:layout_height="16dp"
-        android:layout_width="match_parent" />
-
-    <LinearLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:weightSum="5"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="4"
-            android:layout_height="wrap_content"
-            android:text="Enable SSO"
-            android:textSize="20sp" />
-
-        <Switch
-            android:id="@+id/fragment_settings_switch_useSSO"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-    </LinearLayout>
+        android:text="@string/s_fragment_settings_button_deleteAccount" />
 
 </LinearLayout>

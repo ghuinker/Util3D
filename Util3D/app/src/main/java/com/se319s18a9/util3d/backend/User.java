@@ -111,26 +111,26 @@ public class User {
     public void changeEmail(String email) throws Exception {
         if (isAlreadyLoggedIn())
         {
-            //TODO: Determine if blank email crashes app
-            Task changeTask = mAuth.getCurrentUser().updateEmail(email);
-            while(!changeTask.isComplete());
-            if(!changeTask.isSuccessful())
+            if(email!=null&&!email.isEmpty()) {
+                Task changeTask = mAuth.getCurrentUser().updateEmail(email);
+                while (!changeTask.isComplete()) ;
+                if (!changeTask.isSuccessful()) {
+                    if (changeTask.getException() instanceof FirebaseAuthInvalidUserException) {
+                        throw new Exception("Credentials invalid");
+                    } else if (changeTask.getException() instanceof FirebaseAuthInvalidCredentialsException) {
+                        throw new Exception("Invalid email");
+                    } else if (changeTask.getException() instanceof FirebaseAuthUserCollisionException) {
+                        throw new Exception("Account with that email already exists");
+                    } else if (changeTask.getException() instanceof FirebaseAuthRecentLoginRequiredException) {
+                        throw new Exception("Re-authenticate. Session is too old.");
+                    } else {
+                        throw new Exception("Unknown error");
+                    }
+                }
+            }
+            else
             {
-                if(changeTask.getException() instanceof FirebaseAuthInvalidUserException) {
-                    throw new Exception("Credentials invalid");
-                }
-                else if(changeTask.getException() instanceof FirebaseAuthInvalidCredentialsException) {
-                    throw new Exception("Invalid email");
-                }
-                else if(changeTask.getException() instanceof FirebaseAuthUserCollisionException) {
-                    throw new Exception("Account with that email already exists");
-                }
-                else if(changeTask.getException() instanceof FirebaseAuthRecentLoginRequiredException) {
-                    throw new Exception("Re-authenticate. Session is too old.");
-                }
-                else {
-                    throw new Exception("Unknown error");
-                }
+                throw new Exception("Email can't be blank");
             }
         }
         else {
@@ -139,37 +139,53 @@ public class User {
     }
 
     /**
-     * Re-authenticate user. Used before changing email or password to ensure new session.s
-     *
+     * Re-authenticate user. Used before changing email or password to ensure new session.
      * @param password
-     * @return True if successfully re-authenticated, false if failed to re-authenticate
+     * @throws Exception Message details cause of error
      */
-    public boolean reauthenticate(String password) {
+    public void reauthenticate(String password) throws Exception{
         if(isAlreadyLoggedIn()) {
-            Task authTask = mAuth.getCurrentUser().reauthenticate(EmailAuthProvider.getCredential(getEmail(),password));
-            while (!authTask.isComplete());
-            return authTask.isSuccessful();
+            if(password!=null&&!password.isEmpty()) {
+                Task authTask = mAuth.getCurrentUser().reauthenticate(EmailAuthProvider.getCredential(getEmail(), password));
+                while (!authTask.isComplete()) ;
+                if(!authTask.isSuccessful())
+                {
+                    throw new Exception("Authentication failed");
+                }
+            }
+            else
+            {
+                throw new Exception("Current password cannot be empty");
+            }
         }
         else {
-            return false;
+            throw new Exception("No user logged in");
         }
     }
 
     /**
      * Change username. Returns a boolean since the firebase method does not throw any exceptions.
-     *
      * @param displayName
-     * @return True if username is successfully changed, false if change fails.
+     * @throws Exception Contains message detailing cause of error
      */
-    public boolean changeDisplayName(String displayName) {
+    public void changeDisplayName(String displayName) throws Exception{
         if (isAlreadyLoggedIn()) {
             //TODO: determine if blank display name crashes app
-            UserProfileChangeRequest.Builder change = new UserProfileChangeRequest.Builder();
-            Task changeTask = mAuth.getCurrentUser().updateProfile(change.setDisplayName(displayName).build());
-            while (!changeTask.isComplete());
-            return changeTask.isSuccessful();
+            if(displayName!=null&&!displayName.isEmpty()) {
+                UserProfileChangeRequest.Builder change = new UserProfileChangeRequest.Builder();
+                Task changeTask = mAuth.getCurrentUser().updateProfile(change.setDisplayName(displayName).build());
+                while (!changeTask.isComplete());
+                if(!changeTask.isSuccessful())
+                {
+                    throw new Exception("Error changing username");
+                }
+            }
+            else
+            {
+                throw new Exception("Username can't be empty");
+            }
         } else {
-            return false;
+            throw new Exception("No user logged in");
         }
     }
 
@@ -183,22 +199,23 @@ public class User {
         if (isAlreadyLoggedIn())
         {
             //TODO: Determine if blank password crashes app
-            Task changeTask = mAuth.getCurrentUser().updatePassword(password);
-            while(!changeTask.isComplete());
-            if(!changeTask.isSuccessful())
-            {
-                if(changeTask.getException() instanceof FirebaseAuthInvalidUserException) {
-                    throw new Exception("Credentials invalid");
+            if(password!=null&&!password.isEmpty()) {
+                Task changeTask = mAuth.getCurrentUser().updatePassword(password);
+                while (!changeTask.isComplete()) ;
+                if (!changeTask.isSuccessful()) {
+                    if (changeTask.getException() instanceof FirebaseAuthInvalidUserException) {
+                        throw new Exception("Credentials invalid");
+                    } else if (changeTask.getException() instanceof FirebaseAuthWeakPasswordException) {
+                        throw new Exception("Weak password");
+                    } else if (changeTask.getException() instanceof FirebaseAuthRecentLoginRequiredException) {
+                        throw new Exception("Re-authenticate. Session is too old.");
+                    } else {
+                        throw new Exception("Unknown error");
+                    }
                 }
-                else if(changeTask.getException() instanceof FirebaseAuthWeakPasswordException ) {
-                    throw new Exception("Weak password");
-                }
-                else if(changeTask.getException() instanceof FirebaseAuthRecentLoginRequiredException) {
-                    throw new Exception("Re-authenticate. Session is too old.");
-                }
-                else {
-                    throw new Exception("Unknown error");
-                }
+            }
+            else {
+                throw new Exception("Password can't be empty");
             }
         }
         else {
@@ -227,5 +244,30 @@ public class User {
      */
     public String getEmail(){
         return isAlreadyLoggedIn() ? mAuth.getCurrentUser().getEmail() : "";
+    }
+
+    /**
+     * Completely deletes the user account from firebase.
+     *
+     * @throws Exception Message contains error information
+     */
+    public void deleteAccount() throws Exception{
+        if (isAlreadyLoggedIn())
+        {
+            Task changeTask = mAuth.getCurrentUser().delete();
+            while (!changeTask.isComplete());
+            if (!changeTask.isSuccessful()) {
+                if (changeTask.getException() instanceof FirebaseAuthInvalidUserException) {
+                    throw new Exception("Credentials invalid");
+                } else if (changeTask.getException() instanceof FirebaseAuthRecentLoginRequiredException) {
+                    throw new Exception("Re-authenticate. Session is too old.");
+                } else {
+                    throw new Exception("Unknown error. Session Probably too old.");
+                }
+            }
+        }
+        else {
+            throw new Exception("No user logged in");
+        }
     }
 }
