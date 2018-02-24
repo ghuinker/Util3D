@@ -12,7 +12,7 @@
         android:layout_width="match_parent" />
 
     <android.support.design.widget.FloatingActionButton
-        android:backgroundTint="@color/colorAccent"
+        app:backgroundTint="@color/colorAccent"
         android:id="@+id/fragment_map_fab_myLocation"
         android:layout_gravity="bottom|end"
         android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
         app:rippleColor="@color/colorPrimaryLight" />
 
     <android.support.design.widget.FloatingActionButton
-        android:backgroundTint="@color/colorAccent"
+        app:backgroundTint="@color/colorAccent"
         android:id="@+id/fragment_map_fab_tracking"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
