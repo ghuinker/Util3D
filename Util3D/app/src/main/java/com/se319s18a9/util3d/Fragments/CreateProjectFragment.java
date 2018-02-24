@@ -121,19 +121,23 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
                 fragmentTransaction.replace(R.id.activity_main_frameLayout_root, mapFragment);
                 fragmentTransaction.addToBackStack(null).commit();
 
-                //Debugging
-                StringBuilder proj = new StringBuilder();
-                proj.append("Project Name: "+ this.projectName + "\n");
-                proj.append("Orginization: "+ this.orginization + "\n");
-                proj.append("Project Location: " + this.location + "\n");
-                proj.append("Project Utilites: " + this.utilities.toString());
-                Toast.makeText(mapFragment.getContext(),proj.toString(), Toast.LENGTH_LONG).show();
+
             break;
 
             //TODO make this an actual cancel method that returns to previous screen
             case R.id.fragment_createProject_button_cancel:
                 //Used solely for debugging
-                Toast.makeText(this.getContext(), utilitiesUsed.toString(), Toast.LENGTH_SHORT).show();
+                //Sets Values for global fragment to the edit text value
+                this.orginization = getEditTextValue(orginizationEditText);
+                this.location = getEditTextValue(locationEditText);
+                this.projectName = getEditTextValue(projectNameEditText);
+                //Used solely for debugging
+                StringBuilder proj = new StringBuilder();
+                proj.append("Project Name: "+ this.projectName + "\n");
+                proj.append("Orginization: "+ this.orginization + "\n");
+                proj.append("Project Location: " + this.location + "\n");
+                proj.append("Project Utilites: " + this.utilitiesUsed.toString());
+                Toast.makeText(this.getContext(),proj.toString(), Toast.LENGTH_LONG).show();
                 break;
 
 
