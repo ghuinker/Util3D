@@ -5,11 +5,13 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.util.Property;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,12 +28,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.se319s18a9.util3d.R;
 
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+
+import static android.content.ContentValues.TAG;
 
 
 public class CreateProjectFragment extends Fragment implements View.OnClickListener {
@@ -48,6 +55,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
     private String orginization;
     private String projectName;
     private String location;
+    private Place googlePlace;
 
     public CreateProjectFragment() {
         // Empty constructor
@@ -91,9 +99,33 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
         locationEditText = v.findViewById(R.id.fragment_createProject_editText_location);
         utilitiesUsed = new ArrayList<>();
 
-
+        //Initalize Google AutoComplete Fragment
+        initGoogleLocation();
 
         return v;
+    }
+
+    /**
+     * Initialize Google Location
+     */
+    private void initGoogleLocation(){
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
+                getActivity().getFragmentManager().findFragmentById(R.id.fragment_place_autocomplete_fragment);
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                // TODO: Get info about the selected place.
+                //Log.i(TAG, "Place: " + place.getName());
+                googlePlace = place;
+            }
+
+            @Override
+            public void onError(Status status) {
+                Toast.makeText(getContext(), status.getStatusMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
 
@@ -136,7 +168,8 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
                 proj.append("Project Name: "+ this.projectName + "\n");
                 proj.append("Orginization: "+ this.orginization + "\n");
                 proj.append("Project Location: " + this.location + "\n");
-                proj.append("Project Utilites: " + this.utilitiesUsed.toString());
+                proj.append("Project Utilites: " + this.utilitiesUsed.toString() + "\n");
+                proj.append("Location (Google Location): " + googlePlace.getName());
                 Toast.makeText(this.getContext(),proj.toString(), Toast.LENGTH_LONG).show();
                 break;
 
