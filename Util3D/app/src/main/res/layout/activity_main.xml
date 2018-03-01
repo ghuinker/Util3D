@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -20,9 +19,9 @@
 
         <fragment
             android:id="@+id/activity_main_fragment"
-            android:name="com.se319s18a9.util3d.Fragments.DashboardFragment"
             android:layout_height="match_parent"
-            android:layout_width="match_parent" />
+            android:layout_width="match_parent"
+            android:name="com.se319s18a9.util3d.Fragments.DashboardFragment" />
 
     </FrameLayout>
 

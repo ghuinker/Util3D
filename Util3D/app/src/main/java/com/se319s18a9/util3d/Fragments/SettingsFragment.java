@@ -34,7 +34,17 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if (container != null) {
+            container.removeAllViews();
+        }
+
         View v = inflater.inflate(R.layout.fragment_settings, container, false);
+
+        // Set toolbar title
+
+        getActivity().setTitle(R.string.global_fragmentName_settings);
+
+        // Initialize components and bind listeners
 
         changePasswordButton = v.findViewById(R.id.fragment_settings_button_changePassword);
         changePasswordButton.setOnClickListener(this);
@@ -72,7 +82,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                             });
             final AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
-            alertDialog.getButton(alertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
+            alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
                     if(((EditText) dialogView.findViewById(R.id.dialog_changePassword_editText_newPassword)).getText().toString().equals(
@@ -112,7 +122,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             ((TextView) dialogView.findViewById(R.id.dialog_changeEmail_textView_currentEmail)).setText(User.getInstance().getEmail());
             final AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
-            alertDialog.getButton(alertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
+            alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
                     if (((EditText) dialogView.findViewById(R.id.dialog_changeEmail_editText_newEmail)).getText().toString().equals(
@@ -152,7 +162,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             ((TextView) dialogView.findViewById(R.id.dialog_changeUsername_textView_currentUsername)).setText(User.getInstance().getDisplayName());
             final AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
-            alertDialog.getButton(alertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     try {
@@ -183,7 +193,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                             });
             final AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
-            alertDialog.getButton(alertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
+            alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
                     try {

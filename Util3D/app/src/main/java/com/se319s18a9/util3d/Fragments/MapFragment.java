@@ -95,7 +95,20 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.fragment_map_fab_myLocation:
-                Toast.makeText(getContext(), "My Location", Toast.LENGTH_SHORT).show();
+                // TODO: Move to overflow menu
+//                if(googleMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL) {
+//                    googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+//                    Toast.makeText(getContext(), "Map Type: Satellite", Toast.LENGTH_SHORT).show();
+//                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_SATELLITE) {
+//                    googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+//                    Toast.makeText(getContext(), "Map Type: Terrain", Toast.LENGTH_SHORT).show();
+//                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_TERRAIN) {
+//                    googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+//                    Toast.makeText(getContext(), "Map Type: Hybrid", Toast.LENGTH_SHORT).show();
+//                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_HYBRID) {
+//                    googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+//                    Toast.makeText(getContext(), "Map Type: Normal", Toast.LENGTH_SHORT).show();
+//                }
                 break;
             case R.id.fragment_map_fab_tracking:
                 if(!trackingEnabled) {
