@@ -12,6 +12,6 @@
     <color name="colorDivider">#BDBDBD</color>
 
     <!-- Other Colors -->
-    <!--<color name=""></color>-->
+    <color name="colorGenericRed">#FF0000</color>
 
 </resources>

@@ -26,8 +26,9 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     MapView mMapView;
     private GoogleMap googleMap;
 
-    FloatingActionButton trackingFab;
     FloatingActionButton myLocationFab;
+    FloatingActionButton utilityTypeFab;
+    FloatingActionButton trackingFab;
 
     boolean trackingEnabled = false;
 
@@ -37,17 +38,31 @@ public class MapFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if (container != null) {
+            container.removeAllViews();
+        }
+
         View v = inflater.inflate(R.layout.fragment_map, container, false);
 
-        trackingFab = v.findViewById(R.id.fragment_map_fab_tracking);
-        trackingFab.setOnClickListener(this);
-        myLocationFab = v.findViewById(R.id.fragment_map_fab_myLocation);
-        myLocationFab.setOnClickListener(this);
+        // Set toolbar title
+
+        getActivity().setTitle(R.string.global_fragmentName_map);
+
+        // Initialize local variables
 
         mMapView = v.findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
 
         mMapView.onResume(); // needed to get the map to display immediately
+
+        myLocationFab = v.findViewById(R.id.fragment_map_fab_myLocation);
+        myLocationFab.setOnClickListener(this);
+
+        utilityTypeFab = v.findViewById(R.id.fragment_map_fab_utilityType);
+        utilityTypeFab.setOnClickListener(this);
+
+        trackingFab = v.findViewById(R.id.fragment_map_fab_tracking);
+        trackingFab.setOnClickListener(this);
 
         try {
             MapsInitializer.initialize(getActivity().getApplicationContext());
@@ -95,30 +110,21 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.fragment_map_fab_myLocation:
-                // TODO: Move to overflow menu
-//                if(googleMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL) {
-//                    googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-//                    Toast.makeText(getContext(), "Map Type: Satellite", Toast.LENGTH_SHORT).show();
-//                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_SATELLITE) {
-//                    googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-//                    Toast.makeText(getContext(), "Map Type: Terrain", Toast.LENGTH_SHORT).show();
-//                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_TERRAIN) {
-//                    googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-//                    Toast.makeText(getContext(), "Map Type: Hybrid", Toast.LENGTH_SHORT).show();
-//                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_HYBRID) {
-//                    googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-//                    Toast.makeText(getContext(), "Map Type: Normal", Toast.LENGTH_SHORT).show();
-//                }
+                // TODO: Move camera to current GPS location
+                break;
+            case R.id.fragment_map_fab_utilityType:
+                // TODO: Create dialog box to select from water, gas, electric, and sewage utility types
                 break;
             case R.id.fragment_map_fab_tracking:
                 if(!trackingEnabled) {
                     trackingEnabled = true;
+                    // TODO: Change FAB color to red
                     Toast.makeText(getContext(), "Tracking enabled", Toast.LENGTH_SHORT).show();
                 } else {
                     trackingEnabled = false;
+                    // TODO: Change FAB color to theme accent
                     Toast.makeText(getContext(), "Tracking disabled", Toast.LENGTH_SHORT).show();
                 }
-
                 break;
         }
     }

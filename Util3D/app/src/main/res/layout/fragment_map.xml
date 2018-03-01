@@ -13,7 +13,7 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fragment_map_fab_myLocation"
-        android:layout_gravity="bottom|end"
+        android:layout_gravity="top|start"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:layout_width="wrap_content"
@@ -24,14 +24,26 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fragment_map_fab_tracking"
-        android:layout_gravity="top|end"
+        android:layout_gravity="bottom|end"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="85dp"
+        android:layout_margin="16dp"
         android:layout_width="wrap_content"
         android:src="@android:drawable/ic_media_play"
         app:backgroundTint="@color/colorAccent"
         app:fabSize="normal"
-        app:layout_anchor="@id/fragment_map_fab_myLocation"
+        app:rippleColor="@color/colorPrimaryLight" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fragment_map_fab_utilityType"
+
+        android:layout_gravity="top|end"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="85dp"
+        android:layout_width="wrap_content"
+        android:src="@android:drawable/ic_menu_manage"
+        app:backgroundTint="@color/colorAccent"
+        app:fabSize="normal"
+        app:layout_anchor="@id/fragment_map_fab_tracking"
         app:layout_anchorGravity="top"
         app:rippleColor="@color/colorPrimaryLight" />
 
