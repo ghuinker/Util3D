@@ -10,6 +10,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.se319s18a9.util3d.database.UserInfo;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.se319s18a9.util3d.R;
 import com.se319s18a9.util3d.backend.User;
 
@@ -20,8 +25,35 @@ public class CreateAccountFragment extends Fragment implements View.OnClickListe
     Button createButton;
     Button cancelButton;
 
+    private EditText fullName;
+    private EditText companyName;
+    private EditText occupation;
+    private EditText phoneNumber;
+
+    private DatabaseReference databaseReference;
+    private FirebaseAuth mAuth;
+
     public interface OnAccountCreatedListener {
         void onAccountCreated(String username, String password);
+    }
+
+    public void saveUser() {
+
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        String name = fullName.getText().toString().trim();
+        String occ = occupation.getText().toString().trim();
+        String company = companyName.getText().toString().trim();
+        String phone = phoneNumber.getText().toString().trim();
+
+        UserInfo userInfo = new UserInfo(company, name, occ, phone);
+
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        databaseReference.child(user.getUid()).setValue(userInfo);
+
+        //Toast.makeText(this, "Information Updated",Toast.LENGTH_LONG).show();
+
     }
 
     public CreateAccountFragment() {
@@ -48,6 +80,10 @@ public class CreateAccountFragment extends Fragment implements View.OnClickListe
         View v = inflater.inflate(R.layout.fragment_createaccount, container, false);
 
         // Initialize EditTexts and Buttons
+//        fullName = getView().findViewById(R.id.fragment_createAccount_editText_fullName);
+//        occupation = getView().findViewById(R.id.fragment_createAccount_editText_occupation);
+//        companyName = getView().findViewById(R.id.fragment_createAccount_editText_companyName);
+//        phoneNumber = getView().findViewById(R.id.fragment_createAccount_editText_phoneNumber);
 
         createButton = v.findViewById(R.id.fragment_createAccount_button_create);
         createButton.setOnClickListener(this);
@@ -70,6 +106,7 @@ public class CreateAccountFragment extends Fragment implements View.OnClickListe
                             if(((EditText) this.getView().findViewById(R.id.fragment_createAccount_editText_username)).getText().toString()!=null&&
                                     !((EditText) this.getView().findViewById(R.id.fragment_createAccount_editText_username)).getText().toString().isEmpty()) {
                                 User.getInstance().changeDisplayName(((EditText) this.getView().findViewById(R.id.fragment_createAccount_editText_username)).getText().toString());
+                                saveUser();
                             }
                         } catch(Exception e){
                             Toast.makeText(this.getContext(), R.string.s_fragment_createAccount_errorMessage_usernameNotSet, Toast.LENGTH_SHORT).show();
