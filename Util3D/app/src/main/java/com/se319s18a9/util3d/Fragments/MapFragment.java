@@ -12,11 +12,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.se319s18a9.util3d.R;
 
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -92,23 +96,47 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.toolbar_map_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.fragment_map_menu_togglemaptype:
+                if(googleMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL) {
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                    Toast.makeText(getContext(), "Map Type: Satellite", Toast.LENGTH_SHORT).show();
+                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_SATELLITE) {
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                    Toast.makeText(getContext(), "Map Type: Terrain", Toast.LENGTH_SHORT).show();
+                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_TERRAIN) {
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                    Toast.makeText(getContext(), "Map Type: Hybrid", Toast.LENGTH_SHORT).show();
+                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_HYBRID) {
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    Toast.makeText(getContext(), "Map Type: Normal", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            default:
+                Toast.makeText(getActivity(), "Something happened", Toast.LENGTH_SHORT).show();
+                return false;
+
+        }
+    }
+
+    @Override
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.fragment_map_fab_myLocation:
                 // TODO: Move to overflow menu
-//                if(googleMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL) {
-//                    googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-//                    Toast.makeText(getContext(), "Map Type: Satellite", Toast.LENGTH_SHORT).show();
-//                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_SATELLITE) {
-//                    googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-//                    Toast.makeText(getContext(), "Map Type: Terrain", Toast.LENGTH_SHORT).show();
-//                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_TERRAIN) {
-//                    googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-//                    Toast.makeText(getContext(), "Map Type: Hybrid", Toast.LENGTH_SHORT).show();
-//                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_HYBRID) {
-//                    googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-//                    Toast.makeText(getContext(), "Map Type: Normal", Toast.LENGTH_SHORT).show();
-//                }
+
                 break;
             case R.id.fragment_map_fab_tracking:
                 if(!trackingEnabled) {
