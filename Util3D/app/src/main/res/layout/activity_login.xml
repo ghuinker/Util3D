@@ -19,9 +19,9 @@
 
         <fragment
             android:id="@+id/activity_login_fragment"
-            android:name="com.se319s18a9.util3d.Fragments.LoginFragment"
             android:layout_height="match_parent"
-            android:layout_width="match_parent" />
+            android:layout_width="match_parent"
+            android:name="com.se319s18a9.util3d.Fragments.LoginFragment" />
 
     </FrameLayout>
 

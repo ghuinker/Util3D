@@ -70,7 +70,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_createproject, container, false);
 
-        //Initalize Buttons
+        // Initialize Buttons
         createProjectButton = v.findViewById(R.id.fragment_createProject_button_create);
         createProjectButton.setOnClickListener(this);
         cancelButton = v.findViewById(R.id.fragment_createProject_button_cancel);
