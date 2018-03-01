@@ -1,61 +1,42 @@
 package com.se319s18a9.util3d.Fragments;
 
-
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.net.wifi.WifiConfiguration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
-import android.util.Property;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.se319s18a9.util3d.R;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
-import static android.content.ContentValues.TAG;
-
-
 public class CreateProjectFragment extends Fragment implements View.OnClickListener {
 
+    private EditText projectNameEditText;
+    private EditText organizationEditText;
+    private EditText locationEditText;
     private Button createProjectButton;
     private Button cancelButton;
     private Spinner utilitiesSpinner;
-    private EditText projectNameEditText;
-    private EditText orginizationEditText;
-    private EditText locationEditText;
 
     private ArrayList<String> utilitiesUsed;
     private ArrayList<Utility> utilities;
-    private String orginization;
+    private String organization;
     private String projectName;
     private String location;
-    private Place googlePlace;
 
     public CreateProjectFragment() {
         // Empty constructor
@@ -68,70 +49,61 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if (container != null) {
+            container.removeAllViews();
+        }
+
         View v = inflater.inflate(R.layout.fragment_createproject, container, false);
 
-        // Initialize Buttons
+        // Set toolbar title
+
+        getActivity().setTitle(R.string.global_fragmentName_createProject);
+
+        // Initialize local variables
+
+        String[] utilityNames = getResources().getStringArray(R.array.s_fragment_createProject_spinner_utilities);
+
+        // Initialize components and bind listeners
+
+        projectNameEditText = v.findViewById(R.id.fragment_createProject_editText_projectName);
+        locationEditText = v.findViewById(R.id.fragment_createProject_editText_location);
+
+        utilitiesSpinner = v.findViewById(R.id.fragment_createProject_spinner_utilites);
+
+        organizationEditText = v.findViewById(R.id.fragment_createProject_editText_organization);
+
         createProjectButton = v.findViewById(R.id.fragment_createProject_button_create);
         createProjectButton.setOnClickListener(this);
+
         cancelButton = v.findViewById(R.id.fragment_createProject_button_cancel);
         cancelButton.setOnClickListener(this);
 
-        //Initalize Spinner
-        utilitiesSpinner = v.findViewById(R.id.fragment_createProject_spinner_utilites);
-        //Initalize and populate utility spinner with string array from string resource package
+        // Initialize and populate utility spinner with string array from string resource package
+
         utilities = new ArrayList<>();
-        String[] utilityNames = getResources().getStringArray(R.array.s_fragment_createProject_spinner_utilities);
-        for (int i=0; i<utilityNames.length; i++){
-            utilities.add(new Utility(utilityNames[i], false));
+        for (String utilityName : utilityNames) {
+            utilities.add(new Utility(utilityName, true));
         }
 
-        //Create an array from utilites arraylist to be passed into multispinner adapter
+        updateUtilitiesChecked();
+
+        // Create an array from utilities ArrayList to be passed into MultiSpinner adapter
+
         Utility[] utilArr = new Utility[utilities.size()];
         utilArr = utilities.toArray(utilArr);
 
-        //create and initalize multispinner adapter and set spinner to this adapter
-        MultiSpinnerAdapter adapter = new MultiSpinnerAdapter(this.getContext(), R.layout.fragment_spinneritem, R.id.fragment_spinneritem_textview, utilArr);
+        // Create and initialize MultiSpinner adapter and set spinner to this adapter
+
+        MultiSpinnerAdapter adapter = new MultiSpinnerAdapter(this.getContext(), R.layout.fragment_spinneritem, R.id.fragment_spinnerItem_textView, utilArr);
         utilitiesSpinner.setAdapter(adapter);
-
-        //Initalizes fields to the textview
-        projectNameEditText = v.findViewById(R.id.fragment_createProject_editText_projectName);
-        orginizationEditText = v.findViewById(R.id.fragment_createProject_editText_organization);
-        locationEditText = v.findViewById(R.id.fragment_createProject_editText_location);
         utilitiesUsed = new ArrayList<>();
-
-        //Initalize Google AutoComplete Fragment
-        initGoogleLocation();
 
         return v;
     }
 
     /**
-     * Initialize Google Location
-     */
-    private void initGoogleLocation(){
-        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)
-                getActivity().getFragmentManager().findFragmentById(R.id.fragment_place_autocomplete_fragment);
-
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                // TODO: Get info about the selected place.
-                //Log.i(TAG, "Place: " + place.getName());
-                googlePlace = place;
-            }
-
-            @Override
-            public void onError(Status status) {
-                Toast.makeText(getContext(), status.getStatusMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-    }
-
-
-    /**
      * Method called whenever the screen is clicked.
-     * @param v
+     * @param v TBD
      */
     @Override
     public void onClick(View v) {
@@ -143,7 +115,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
             case R.id.fragment_createProject_button_create:
 
                 //Sets Values for global fragment to the edit text value
-                this.orginization = getEditTextValue(orginizationEditText);
+                this.organization = getEditTextValue(organizationEditText);
                 this.location = getEditTextValue(locationEditText);
                 this.projectName = getEditTextValue(projectNameEditText);
 
@@ -156,38 +128,33 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
 
             break;
 
-            //TODO make this an actual cancel method that returns to previous screen
+            // TODO: Make this an actual cancel method that returns to previous screen
             case R.id.fragment_createProject_button_cancel:
                 //Used solely for debugging
                 //Sets Values for global fragment to the edit text value
-                this.orginization = getEditTextValue(orginizationEditText);
+                this.organization = getEditTextValue(organizationEditText);
                 this.location = getEditTextValue(locationEditText);
                 this.projectName = getEditTextValue(projectNameEditText);
                 //Used solely for debugging
                 StringBuilder proj = new StringBuilder();
                 proj.append("Project Name: "+ this.projectName + "\n");
-                proj.append("Orginization: "+ this.orginization + "\n");
+                proj.append("Organization: "+ this.organization + "\n");
                 proj.append("Project Location: " + this.location + "\n");
-                proj.append("Project Utilites: " + this.utilitiesUsed.toString() + "\n");
-                proj.append("Location (Google Location): " + googlePlace.getName());
+                proj.append("Project Utilities: " + this.utilitiesUsed.toString() + "\n");
                 Toast.makeText(this.getContext(),proj.toString(), Toast.LENGTH_LONG).show();
                 break;
-
-
         }
     }
-
 
     /**
      * Creates Adapter For Multi Spinner
      */
-    public class MultiSpinnerAdapter extends ArrayAdapter<Utility>{
-
+    public class MultiSpinnerAdapter extends ArrayAdapter<Utility> {
         private Context context;
         private Utility[] utilities;
         private LayoutInflater flater;
 
-        public MultiSpinnerAdapter(@NonNull Context context, int layoutID, int textViewID, Utility[] data ) {
+        MultiSpinnerAdapter(@NonNull Context context, int layoutID, int textViewID, Utility[] data ) {
             super(context, layoutID, textViewID, data);
             this.context = context;
             this.utilities = data;
@@ -202,49 +169,50 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
             }
 
             View utilityView = flater.inflate(R.layout.fragment_spinneritem_closed, null, true);
-            TextView textView = (TextView) utilityView.findViewById(R.id.fragment_spinneritem_closed_textview);
-            textView.setText("Select Utilites");
+            TextView textView = (TextView) utilityView.findViewById(R.id.fragment_spinnerItem_closed_textView);
+            textView.setText("Select Utilities");
 
             return utilityView;
         }
 
-        //Sets Each view of spinner when drop down is down
+        // Sets Each view of spinner when drop down is down
         @Override
-        public View getDropDownView(int pos, View convertView, ViewGroup parent){
-            if(convertView == null){
+        public View getDropDownView(int pos, View convertView, ViewGroup parent) {
+            if(convertView == null) {
                 convertView = flater.inflate(R.layout.fragment_spinneritem, parent, false);
             }
+
             Utility utility = this.utilities[pos];
 
-            String utiliityName = this.utilities[pos].toString();
-            TextView title = (TextView) convertView.findViewById(R.id.fragment_spinneritem_textview);
+            String utilityName = this.utilities[pos].toString();
+            TextView title = (TextView) convertView.findViewById(R.id.fragment_spinnerItem_textView);
 
-            CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.fragment_spinneritem_checkbox);
+            CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.fragment_spinnerItem_checkbox);
 
+            checkBox.setChecked(utilities[pos].isChecked);
             checkBox.setOnCheckedChangeListener(new CustomOnCheckedChangeListener(utility, context));
 
-            title.setText(utiliityName);
+            title.setText(utilityName);
             return convertView;
         }
-
     }
 
     /**
      * Class of custom onChecked Listener
      */
-    public class CustomOnCheckedChangeListener implements CompoundButton.OnCheckedChangeListener {
+    private class CustomOnCheckedChangeListener implements CompoundButton.OnCheckedChangeListener {
         Context context;
         Utility utility;
 
-        public CustomOnCheckedChangeListener(Utility utility, Context context){
+        CustomOnCheckedChangeListener(Utility utility, Context context){
             this.utility = utility;
             this.context = context;
         }
 
         /**
          * Called whenever a checkbox is clicked on. The new state is passed as boolean b
-         * @param compoundButton
-         * @param b
+         * @param compoundButton TBD
+         * @param b TBD
          */
         @Override
         public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -257,33 +225,24 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
     /**
      * Class of utility items for MultiSpinner Adapter
      */
-    public class Utility{
+    private class Utility{
         boolean isChecked;
         String utilityType;
 
-        public Utility(String utilityType,boolean isChecked){
+        Utility(String utilityType, boolean isChecked){
             this.isChecked = isChecked;
             this.utilityType = utilityType;
         }
 
-        public void setIsChecked(boolean checked){
+        void setIsChecked(boolean checked){
             isChecked = checked;
         }
-        public void changeChecked(){
-            isChecked = !isChecked;
-        }
-        public boolean isChecked(){
-            return isChecked;
-        }
-        public String getUtilityType(){
-            return utilityType;
-        }
+
         @Override
         public String toString(){
             return utilityType;
         }
     }
-
 
     /**
      * This method update the string list that will allow us to see the utilities picked
@@ -297,42 +256,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
         }
     }
 
-    /**
-     * This method gets the string value from the edittext given
-     *
-     * @param editText
-     * @return String from editext
-     */
     private String getEditTextValue(EditText editText) {
         return editText.getText().toString();
     }
-
-    /**
-     * @return utility String
-     */
-    public ArrayList<String> getUtility(){
-        return utilitiesUsed;
-    }
-
-    /**
-     * @return orginization String
-     */
-    public String getOrginization(){
-        return orginization;
-    }
-
-    /**
-     * @return projectname String
-     */
-    public String getProjectName(){
-        return projectName;
-    }
-
-    /**
-     * @return Orginization
-     */
-    public String getLocation(){
-        return orginization;
-    }
-
 }
