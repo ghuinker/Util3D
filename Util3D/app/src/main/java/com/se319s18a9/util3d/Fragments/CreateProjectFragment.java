@@ -62,7 +62,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
     private String location;
     private Place googlePlace;
 
-    private String JSONString = "test";
+    private String JSONString = "test"; //Need JSON String from Mason
 
     private DatabaseReference databaseReference;
     private FirebaseAuth mAuth;
