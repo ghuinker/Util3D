@@ -10,7 +10,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.se319s18a9.util3d.database.UserInfo;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -32,7 +31,6 @@ public class CreateAccountFragment extends Fragment implements View.OnClickListe
     Button cancelButton;
 
     private DatabaseReference databaseReference;
-    private FirebaseAuth mAuth;
 
     public CreateAccountFragment() {
         // Empty constructor
@@ -65,8 +63,6 @@ public class CreateAccountFragment extends Fragment implements View.OnClickListe
         View v = inflater.inflate(R.layout.fragment_createaccount, container, false);
 
         getActivity().setTitle("Create Account");
-
-        mAuth = FirebaseAuth.getInstance();
 
         // Initialize EditTexts and Buttons
 
