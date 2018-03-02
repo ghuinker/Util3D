@@ -81,8 +81,9 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
         String json = JSONString.trim();
 
         StoreJSON storeJSON = new StoreJSON(projectname, orginizationname, locationname, json);
-
+        
         databaseReference.child(User.getInstance().getUserID()).child("Projects").child(getProjectName()).setValue(storeJSON);
+
 
         //Toast.makeText(this, "Information Updated",Toast.LENGTH_LONG).show();
 
