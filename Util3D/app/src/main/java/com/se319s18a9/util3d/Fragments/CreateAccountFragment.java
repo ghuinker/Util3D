@@ -64,6 +64,8 @@ public class CreateAccountFragment extends Fragment implements View.OnClickListe
 
         View v = inflater.inflate(R.layout.fragment_createaccount, container, false);
 
+        // Set toolbar title
+
         getActivity().setTitle("Create Account");
 
         // Initialize EditTexts and Buttons

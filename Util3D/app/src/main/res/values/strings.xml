@@ -120,4 +120,7 @@
         <item>Sewage</item>
     </string-array>
 
+    <!-- MapFragment String-->
+    <string name="s_fragment_map_menu_togglemaptype">Toggle Map Type</string>
+
 </resources>
