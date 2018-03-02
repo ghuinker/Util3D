@@ -9,17 +9,19 @@ public class UserInfo {
     public String fullName;
     public String occupation;
     public String phoneNumber;
+    public String username;
 
 
     public UserInfo(){
         //empty constructor
     }
 
-    public UserInfo(String companyName, String fullName, String occupation, String phoneNumber) //can add more info, just add more to parameters
+    public UserInfo(String companyName, String fullName, String occupation, String phoneNumber, String username) //can add more info, just add more to parameters
     {
         this.companyName = companyName;
         this.fullName = fullName;
         this.occupation = occupation;
         this.phoneNumber = phoneNumber;
+        this.username = username;
     }
 }

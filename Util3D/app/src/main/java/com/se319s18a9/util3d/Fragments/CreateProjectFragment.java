@@ -32,7 +32,12 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.se319s18a9.util3d.R;
+import com.se319s18a9.util3d.backend.User;
+import com.se319s18a9.util3d.database.StoreJSON;
 
 import org.w3c.dom.Text;
 
@@ -57,8 +62,30 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
     private String location;
     private Place googlePlace;
 
+    private String JSONString = "test";
+
+    private DatabaseReference databaseReference;
+    private FirebaseAuth mAuth;
+
     public CreateProjectFragment() {
         // Empty constructor
+    }
+
+    public void saveJSON() {
+
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        String projectname = projectNameEditText.getText().toString().trim();
+        String orginizationname = orginizationEditText.getText().toString().trim();
+        String locationname = locationEditText.getText().toString().trim();
+        String json = JSONString.trim();
+
+        StoreJSON storeJSON = new StoreJSON(projectname, orginizationname, locationname, json);
+
+        databaseReference.child(User.getInstance().getUserID()).setValue(storeJSON);
+
+        //Toast.makeText(this, "Information Updated",Toast.LENGTH_LONG).show();
+
     }
 
     @Override
@@ -152,6 +179,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.activity_main_frameLayout_root, mapFragment);
                 fragmentTransaction.addToBackStack(null).commit();
+                saveJSON();
 
 
             break;
