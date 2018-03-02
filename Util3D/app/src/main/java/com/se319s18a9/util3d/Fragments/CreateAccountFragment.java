@@ -27,6 +27,7 @@ public class CreateAccountFragment extends Fragment implements View.OnClickListe
     private EditText phoneNumber;
     private EditText occupation;
 
+
     Button createButton;
     Button cancelButton;
 
@@ -45,10 +46,11 @@ public class CreateAccountFragment extends Fragment implements View.OnClickListe
         String occ = occupation.getText().toString().trim();
         String company = companyName.getText().toString().trim();
         String phone = phoneNumber.getText().toString().trim();
+        String username = usernameEditText.getText().toString().trim();
 
-        UserInfo userInfo = new UserInfo(company, name, occ, phone);
+        UserInfo userInfo = new UserInfo(company, name, occ, phone, username);
 
-        databaseReference.child(User.getInstance().getUserID()).setValue(userInfo);
+        databaseReference.child(User.getInstance().getUserID()).child("User").setValue(userInfo);
 
         //Toast.makeText(this, "Information Updated",Toast.LENGTH_LONG).show();
 
