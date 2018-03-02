@@ -2,8 +2,10 @@ package com.se319s18a9.util3d.Fragments;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 
+import com.amulyakhare.textdrawable.TextDrawable;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
@@ -23,6 +25,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MapFragment extends Fragment implements View.OnClickListener {
@@ -31,10 +34,27 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     private GoogleMap googleMap;
 
     FloatingActionButton myLocationFab;
+
+    TextView waterUtilityTextView;
+    FloatingActionButton waterUtilityTypeFab;
+    TextView gasUtilityTextView;
+    FloatingActionButton gasUtilityTypeFab;
+    TextView electricUtilityTextView;
+    FloatingActionButton electricUtilityTypeFab;
+    TextView sewageUtilityTextView;
+    FloatingActionButton sewageUtilityTypeFab;
+
     FloatingActionButton utilityTypeFab;
     FloatingActionButton trackingFab;
 
+    public enum UtilityType {
+        WATER, GAS, ELECTRIC, SEWAGE
+    }
+
+    public UtilityType selectedUtility = UtilityType.WATER;
+
     boolean trackingEnabled = false;
+    boolean utilitiesVisible = false;
 
     public MapFragment() {
         // Empty constructor
@@ -61,6 +81,34 @@ public class MapFragment extends Fragment implements View.OnClickListener {
 
         myLocationFab = v.findViewById(R.id.fragment_map_fab_myLocation);
         myLocationFab.setOnClickListener(this);
+
+        waterUtilityTextView = v.findViewById(R.id.fragment_map_textView_waterUtilityType);
+        waterUtilityTextView.setVisibility(View.INVISIBLE);
+
+        waterUtilityTypeFab = v.findViewById(R.id.fragment_map_fab_utilityType_water);
+        waterUtilityTypeFab.setOnClickListener(this);
+        waterUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+        gasUtilityTextView = v.findViewById(R.id.fragment_map_textView_gasUtilityType);
+        gasUtilityTextView.setVisibility(View.INVISIBLE);
+
+        gasUtilityTypeFab= v.findViewById(R.id.fragment_map_fab_utilityType_gas);
+        gasUtilityTypeFab.setOnClickListener(this);
+        gasUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+        electricUtilityTextView = v.findViewById(R.id.fragment_map_textView_electricUtilityType);
+        electricUtilityTextView.setVisibility(View.INVISIBLE);
+
+        electricUtilityTypeFab = v.findViewById(R.id.fragment_map_fab_utilityType_electric);
+        electricUtilityTypeFab.setOnClickListener(this);
+        electricUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+        sewageUtilityTextView = v.findViewById(R.id.fragment_map_textView_sewageUtilityType);
+        sewageUtilityTextView.setVisibility(View.INVISIBLE);
+
+        sewageUtilityTypeFab = v.findViewById(R.id.fragment_map_fab_utilityType_sewage);
+        sewageUtilityTypeFab.setOnClickListener(this);
+        sewageUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
 
         utilityTypeFab = v.findViewById(R.id.fragment_map_fab_utilityType);
         utilityTypeFab.setOnClickListener(this);
@@ -152,17 +200,74 @@ public class MapFragment extends Fragment implements View.OnClickListener {
             case R.id.fragment_map_fab_myLocation:
                 // TODO: Move camera to current GPS location
                 break;
+            case R.id.fragment_map_fab_utilityType_water:
+                Toast.makeText(getContext(), "Water", Toast.LENGTH_SHORT).show();
+                selectedUtility = UtilityType.WATER;
+                break;
+            case R.id.fragment_map_fab_utilityType_gas:
+                Toast.makeText(getContext(), "Gas", Toast.LENGTH_SHORT).show();
+                selectedUtility = UtilityType.GAS;
+                break;
+            case R.id.fragment_map_fab_utilityType_electric:
+                Toast.makeText(getContext(), "Electric", Toast.LENGTH_SHORT).show();
+                selectedUtility = UtilityType.ELECTRIC;
+                break;
+            case R.id.fragment_map_fab_utilityType_sewage:
+                Toast.makeText(getContext(), "Sewage", Toast.LENGTH_SHORT).show();
+                selectedUtility = UtilityType.SEWAGE;
+                break;
             case R.id.fragment_map_fab_utilityType:
-                // TODO: Create dialog box to select from water, gas, electric, and sewage utility types
+                if(!trackingEnabled && !utilitiesVisible) {
+                    enableUtilities(true);
+                } else if(utilitiesVisible) {
+                    enableUtilities(false);
+                }
                 break;
             case R.id.fragment_map_fab_tracking:
                 if(!trackingEnabled) {
                     trackingEnabled = true;
-                    // TODO: Change FAB color to red
+                    utilityTypeFab.setEnabled(false);
+                    enableUtilities(false);
                     Toast.makeText(getContext(), "Tracking enabled", Toast.LENGTH_SHORT).show();
+
+                    TextDrawable drawable = null;
+
+                    switch (selectedUtility) {
+                        case WATER:
+                            drawable = TextDrawable.builder()
+                                    .beginConfig()
+                                    .width(120)  // width in px
+                                    .height(120) // height in px
+                                    .endConfig().buildRound("W", R.color.colorPrimaryDark);
+                            break;
+                        case GAS:
+                            drawable = TextDrawable.builder()
+                                    .beginConfig()
+                                    .width(120)  // width in px
+                                    .height(120) // height in px
+                                    .endConfig().buildRound("G", R.color.colorPrimaryDark);
+                            break;
+                        case ELECTRIC:
+                            drawable = TextDrawable.builder()
+                                    .beginConfig()
+                                    .width(120)  // width in px
+                                    .height(120) // height in px
+                                    .endConfig().buildRound("E", R.color.colorPrimaryDark);
+                            break;
+                        case SEWAGE:
+                            drawable = TextDrawable.builder()
+                                    .beginConfig()
+                                    .width(120)  // width in px
+                                    .height(120) // height in px
+                                    .endConfig().buildRound("S", R.color.colorPrimaryDark);
+                            break;
+                    }
+
+                    trackingFab.setImageDrawable(drawable);
                 } else {
                     trackingEnabled = false;
-                    // TODO: Change FAB color to theme accent
+                    utilityTypeFab.setEnabled(true);
+                    trackingFab.setImageResource(android.R.drawable.ic_media_play);
                     Toast.makeText(getContext(), "Tracking disabled", Toast.LENGTH_SHORT).show();
                 }
                 break;
@@ -203,5 +308,57 @@ public class MapFragment extends Fragment implements View.OnClickListener {
                 }
             }
         });
+    }
+
+    // Helper methods
+
+    private void enableUtilities(boolean enable) {
+        if(enable) {
+            // set visible
+
+            waterUtilityTypeFab.setVisibility(FloatingActionButton.VISIBLE);
+            waterUtilityTextView.setVisibility(View.VISIBLE);
+
+            gasUtilityTypeFab.setVisibility(FloatingActionButton.VISIBLE);
+            gasUtilityTextView.setVisibility(View.VISIBLE);
+
+            electricUtilityTypeFab.setVisibility(FloatingActionButton.VISIBLE);
+            electricUtilityTextView.setVisibility(View.VISIBLE);
+
+            sewageUtilityTypeFab.setVisibility(FloatingActionButton.VISIBLE);
+            sewageUtilityTextView.setVisibility(View.VISIBLE);
+
+            // set listeners
+
+            waterUtilityTypeFab.setOnClickListener(this);
+            gasUtilityTypeFab.setOnClickListener(this);
+            electricUtilityTypeFab.setOnClickListener(this);
+            sewageUtilityTypeFab.setOnClickListener(this);
+
+            utilitiesVisible = true;
+        } else {
+            // set invisible
+
+            waterUtilityTextView.setVisibility(View.INVISIBLE);
+            waterUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+            gasUtilityTextView.setVisibility(View.INVISIBLE);
+            gasUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+            electricUtilityTextView.setVisibility(View.INVISIBLE);
+            electricUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+            sewageUtilityTextView.setVisibility(View.INVISIBLE);
+            sewageUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+            // disconnect listeners
+
+            waterUtilityTypeFab.setOnClickListener(null);
+            gasUtilityTypeFab.setOnClickListener(null);
+            electricUtilityTypeFab.setOnClickListener(null);
+            sewageUtilityTypeFab.setOnClickListener(null);
+
+            utilitiesVisible = false;
+        }
     }
 }
