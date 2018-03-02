@@ -10,6 +10,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.se319s18a9.util3d.R;
@@ -238,28 +239,28 @@ public class MapFragment extends Fragment implements View.OnClickListener {
                                     .beginConfig()
                                     .width(120)  // width in px
                                     .height(120) // height in px
-                                    .endConfig().buildRound("W", R.color.colorPrimaryDark);
+                                    .endConfig().buildRound("W", R.color.colorGenericBlue);
                             break;
                         case GAS:
                             drawable = TextDrawable.builder()
                                     .beginConfig()
                                     .width(120)  // width in px
                                     .height(120) // height in px
-                                    .endConfig().buildRound("G", R.color.colorPrimaryDark);
+                                    .endConfig().buildRound("G", R.color.colorGenericOrange);
                             break;
                         case ELECTRIC:
                             drawable = TextDrawable.builder()
                                     .beginConfig()
                                     .width(120)  // width in px
                                     .height(120) // height in px
-                                    .endConfig().buildRound("E", R.color.colorPrimaryDark);
+                                    .endConfig().buildRound("E", R.color.colorGenericYellow);
                             break;
                         case SEWAGE:
                             drawable = TextDrawable.builder()
                                     .beginConfig()
                                     .width(120)  // width in px
                                     .height(120) // height in px
-                                    .endConfig().buildRound("S", R.color.colorPrimaryDark);
+                                    .endConfig().buildRound("S", R.color.colorGenericGreen);
                             break;
                     }
 
@@ -303,8 +304,28 @@ public class MapFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onMapClick(LatLng point) {
                 if(trackingEnabled) {
-                    MarkerOptions marker = new MarkerOptions().position(new LatLng(point.latitude, point.longitude)).title("New Marker");
-                    googleMap.addMarker(marker);
+                    switch(selectedUtility) {
+                        case WATER:
+                            googleMap.addMarker(new MarkerOptions()
+                                    .position(new LatLng(point.latitude, point.longitude))
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                            break;
+                        case GAS:
+                            googleMap.addMarker(new MarkerOptions()
+                                    .position(new LatLng(point.latitude, point.longitude))
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+                            break;
+                        case ELECTRIC:
+                            googleMap.addMarker(new MarkerOptions()
+                                    .position(new LatLng(point.latitude, point.longitude))
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+                            break;
+                        case SEWAGE:
+                            googleMap.addMarker(new MarkerOptions()
+                                    .position(new LatLng(point.latitude, point.longitude))
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                            break;
+                    }
                 }
             }
         });
