@@ -163,6 +163,10 @@ public class User {
         }
     }
 
+    public String getUserID(){
+       return mAuth.getCurrentUser().getUid();
+    }
+
     /**
      * Change username. Returns a boolean since the firebase method does not throw any exceptions.
      * @param displayName
