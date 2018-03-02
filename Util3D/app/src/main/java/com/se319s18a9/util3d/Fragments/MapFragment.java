@@ -1,6 +1,7 @@
 package com.se319s18a9.util3d.Fragments;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
@@ -9,22 +10,40 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.se319s18a9.util3d.R;
+import com.se319s18a9.util3d.backend.ConnectedPoint;
+import com.se319s18a9.util3d.backend.Line;
+import com.se319s18a9.util3d.backend.Map;
+import com.se319s18a9.util3d.backend.User;
 
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
 
 public class MapFragment extends Fragment implements View.OnClickListener {
 
     MapView mMapView;
     private GoogleMap googleMap;
+    Map graph;
 
     FloatingActionButton trackingFab;
     FloatingActionButton myLocationFab;
@@ -47,6 +66,9 @@ public class MapFragment extends Fragment implements View.OnClickListener {
         mMapView = v.findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
 
+        graph = new Map();
+        //graph.setSavedPoint(graph.addNewLine("Electric").getNullHeadPoint());
+
         mMapView.onResume(); // needed to get the map to display immediately
 
         try {
@@ -61,6 +83,18 @@ public class MapFragment extends Fragment implements View.OnClickListener {
                 googleMap = mMap;
 
                 initializeMapOnClickListener();
+
+                byte[] testByte = {123, 34, 108, 105, 110, 101, 48, 34, 58, 123, 34, 116, 121, 112, 101, 34, 58, 34, 69, 108, 101, 99, 116, 114, 105, 99, 34, 44, 34, 105, 110, 105, 116, 105, 97, 108, 80, 111, 105, 110, 116, 34, 58, 123, 34, 108, 97, 116, 105, 116, 117, 100, 101, 34, 58, 48, 44, 34, 108, 111, 110, 103, 105, 116, 117, 100, 101, 34, 58, 48, 44, 34, 99, 104, 105, 108, 100, 48, 34, 58, 123, 34, 108, 97, 116, 105, 116, 117, 100, 101, 34, 58, 45, 49, 56, 46, 56, 54, 56, 49, 55, 57, 57, 54, 48, 54, 55, 56, 51, 53, 56, 44, 34, 108, 111, 110, 103, 105, 116, 117, 100, 101, 34, 58, 45, 53, 46, 56, 53, 57, 51, 54, 48, 51, 53, 57, 54, 48, 57, 49, 50, 55, 44, 34, 99, 104, 105, 108, 100, 48, 34, 58, 123, 34, 108, 97, 116, 105, 116, 117, 100, 101, 34, 58, 49, 51, 46, 48, 49, 49, 54, 56, 53, 48, 56, 50, 49, 55, 56, 56, 55, 57, 44, 34, 108, 111, 110, 103, 105, 116, 117, 100, 101, 34, 58, 50, 54, 46, 51, 54, 55, 50, 48, 48, 57, 49, 49, 48, 52, 53, 48, 55, 56, 44, 34, 99, 104, 105, 108, 100, 48, 34, 58, 123, 34, 108, 97, 116, 105, 116, 117, 100, 101, 34, 58, 49, 57, 46, 53, 51, 50, 49, 55, 52, 48, 54, 54, 54, 49, 49, 52, 52, 44, 34, 108, 111, 110, 103, 105, 116, 117, 100, 101, 34, 58, 45, 49, 53, 46, 57, 51, 55, 52, 56, 52, 56, 48, 48, 56, 49, 53, 53, 56, 50, 44, 34, 99, 104, 105, 108, 100, 48, 34, 58, 123, 34, 108, 97, 116, 105, 116, 117, 100, 101, 34, 58, 52, 57, 46, 51, 48, 54, 48, 49, 53, 51, 52, 57, 51, 51, 56, 50, 50, 44, 34, 108, 111, 110, 103, 105, 116, 117, 100, 101, 34, 58, 57, 46, 50, 53, 55, 56, 50, 56, 52, 56, 49, 52, 57, 53, 51, 56, 44, 34, 99, 104, 105, 108, 100, 48, 34, 58, 123, 34, 108, 97, 116, 105, 116, 117, 100, 101, 34, 58, 53, 49, 46, 51, 57, 57, 50, 48, 49, 56, 56, 56, 51, 57, 51, 52, 49, 44, 34, 108, 111, 110, 103, 105, 116, 117, 100, 101, 34, 58, 45, 49, 57, 46, 49, 48, 49, 53, 52, 52, 57, 53, 51, 56, 56, 50, 54, 57, 52, 125, 125, 44, 34, 99, 104, 105, 108, 100, 49, 34, 58, 123, 34, 108, 97, 116, 105, 116, 117, 100, 101, 34, 58, 49, 57, 46, 55, 53, 50, 57, 48, 51, 48, 50, 49, 48, 57, 54, 51, 56, 55, 44, 34, 108, 111, 110, 103, 105, 116, 117, 100, 101, 34, 58, 45, 52, 56, 46, 49, 54, 52, 48, 51, 49, 57, 56, 57, 56, 55, 50, 52, 53, 54, 44, 34, 99, 104, 105, 108, 100, 48, 34, 58, 123, 34, 108, 97, 116, 105, 116, 117, 100, 101, 34, 58, 57, 46, 50, 49, 55, 55, 54, 49, 57, 48, 57, 56, 49, 48, 52, 57, 49, 44, 34, 108, 111, 110, 103, 105, 116, 117, 100, 101, 34, 58, 45, 51, 55, 46, 55, 51, 52, 51, 50, 54, 54, 48, 56, 52, 55, 57, 48, 50, 125, 125, 44, 34, 99, 104, 105, 108, 100, 50, 34, 58, 123, 34, 108, 97, 116, 105, 116, 117, 100, 101, 34, 58, 52, 56, 46, 50, 50, 52, 54, 54, 48, 53, 56, 55, 56, 54, 53, 57, 51, 44, 34, 108, 111, 110, 103, 105, 116, 117, 100, 101, 34, 58, 45, 52, 50, 46, 52, 50, 49, 56, 52, 52, 57, 51, 54, 57, 48, 55, 50, 57, 125, 125, 44, 34, 99, 104, 105, 108, 100, 49, 34, 58, 123, 34, 108, 97, 116, 105, 116, 117, 100, 101, 34, 58, 51, 51, 46, 54, 50, 54, 56, 48, 48, 49, 51, 57, 51, 54, 55, 55, 55, 52, 44, 34, 108, 111, 110, 103, 105, 116, 117, 100, 101, 34, 58, 55, 56, 46, 48, 52, 54, 57, 48, 50, 56, 50, 55, 57, 49, 56, 53, 51, 125, 125, 44, 34, 99, 104, 105, 108, 100, 49, 34, 58, 123, 34, 108, 97, 116, 105, 116, 117, 100, 101, 34, 58, 45, 52, 54, 46, 56, 56, 48, 50, 51, 52, 55, 52, 50, 52, 53, 52, 51, 54, 44, 34, 108, 111, 110, 103, 105, 116, 117, 100, 101, 34, 58, 56, 46, 50, 48, 51, 49, 53, 52, 55, 50, 55, 56, 49, 54, 53, 56, 50, 125, 44, 34, 99, 104, 105, 108, 100, 50, 34, 58, 123, 34, 108, 97, 116, 105, 116, 117, 100, 101, 34, 58, 45, 50, 55, 46, 57, 57, 52, 52, 50, 48, 48, 54, 49, 57, 56, 50, 49, 49, 53, 44, 34, 108, 111, 110, 103, 105, 116, 117, 100, 101, 34, 58, 45, 51, 55, 46, 57, 54, 56, 55, 50, 48, 49, 54, 48, 52, 50, 52, 55, 49, 125, 125, 125, 125, 125};
+                String test = new String(testByte);
+                try {
+                    graph.readFromJSON(test);
+                }
+                catch(Exception e)
+                {
+
+                }
+
+                renderFromScratch();
 
                 // For showing a move to my location button
                 if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -134,15 +168,92 @@ public class MapFragment extends Fragment implements View.OnClickListener {
         mMapView.onLowMemory();
     }
 
+    private class PointAndPolyline{
+        private ConnectedPoint savedPoint;
+        private Polyline savedPoly;
+
+        PointAndPolyline(ConnectedPoint point, Polyline poly){
+            savedPoint = point;
+            savedPoly = poly;
+        }
+
+        public ConnectedPoint getConnectedPoint()
+        {
+            return savedPoint;
+        }
+
+        public Polyline getSavedPoly()
+        {
+            return savedPoly;
+        }
+    }
+
+    private void renderPoint(ConnectedPoint point){
+        graph.setSavedPoint(point);
+        if(!point.isRoot()) {
+            MarkerOptions markerOptions = new MarkerOptions().position(point.getLatLng());
+            Marker marker = googleMap.addMarker(markerOptions);
+            Polyline polyline = null;
+            if(!point.getParentPoint().isRoot()) {
+                PolylineOptions polylineOptions = new PolylineOptions().add(point.getParentPoint().getLatLng(), point.getLatLng());
+                polyline = googleMap.addPolyline(polylineOptions);
+            }
+            marker.setTag(new PointAndPolyline(point, polyline));
+        }
+        if(point.getChildren()!=null){
+            int childPointIndex = 0;
+            while(childPointIndex<point.getChildren().size())
+            {
+                renderPoint(point.getChildren().get(childPointIndex));
+                childPointIndex++;
+            }
+        }
+    }
+
+    private void renderFromScratch(){
+        googleMap.clear();
+        for (Line line:graph.getLines()) {
+            renderPoint(line.getNullHeadPoint());
+        }
+    }
+
     private void initializeMapOnClickListener() {
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {
                 if(trackingEnabled) {
-                    MarkerOptions marker = new MarkerOptions().position(new LatLng(point.latitude, point.longitude)).title("New Marker");
-                    googleMap.addMarker(marker);
+                    ConnectedPoint currentPoint = graph.getSavedPoint().addAChild(point.latitude, point.longitude);
+                    MarkerOptions markerOptions = new MarkerOptions().position(currentPoint.getLatLng());
+                    Marker marker = googleMap.addMarker(markerOptions);
+                    Polyline polyline = null;
+                    if(!currentPoint.getParentPoint().isRoot())
+                    {
+                        PolylineOptions polylineOptions = new PolylineOptions().add(currentPoint.getParentPoint().getLatLng(),currentPoint.getLatLng());
+                        polyline = googleMap.addPolyline(polylineOptions);
+                    }
+                    marker.setTag(new PointAndPolyline(currentPoint,polyline));
+                    graph.setSavedPoint(currentPoint);
+
+                    //String logMessage;
+                    //try {
+                    //    logMessage = graph.writeToJSON();
+                    //} catch(JSONException e)
+                    //{
+                    //    logMessage = "Failed to write to JSON";
+                    //}
+                    //Log.d("MapJSON",Arrays.toString(logMessage.getBytes()));
                 }
             }
         });
+
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                graph.setSavedPoint(((PointAndPolyline) marker.getTag()).getConnectedPoint());
+                return false;
+            }
+        });
+
+    //TODO: Add marker drag listener
     }
 }
