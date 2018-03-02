@@ -15,7 +15,7 @@ public class User {
     private static final User instance = new User();
     private FirebaseAuth mAuth;
 
-    private User() {
+    public User() {
         mAuth = FirebaseAuth.getInstance();
     }
 
