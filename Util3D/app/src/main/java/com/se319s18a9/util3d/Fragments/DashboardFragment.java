@@ -10,13 +10,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.se319s18a9.util3d.LoginActivity;
 import com.se319s18a9.util3d.R;
 import com.se319s18a9.util3d.backend.User;
 
 public class DashboardFragment extends Fragment implements View.OnClickListener {
 
     Button createProjectButton;
+    Button openProjectButton;
     Button settingsButton;
     Button logoutButton;
 
@@ -32,8 +32,17 @@ public class DashboardFragment extends Fragment implements View.OnClickListener 
 
         View v = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
+        // Set toolbar title
+
+        getActivity().setTitle(R.string.global_fragmentName_dashboard);
+
+        // Initialize components and bind listeners
+
         createProjectButton = v.findViewById(R.id.fragment_dashboard_button_createProject);
         createProjectButton.setOnClickListener(this);
+
+        openProjectButton = v.findViewById(R.id.fragment_dashboard_button_openProject);
+        openProjectButton.setOnClickListener(this);
 
         settingsButton = v.findViewById(R.id.fragment_dashboard_button_settings);
         settingsButton.setOnClickListener(this);
@@ -70,7 +79,7 @@ public class DashboardFragment extends Fragment implements View.OnClickListener 
             case R.id.fragment_dashboard_button_logout:
                 User.getInstance().signOut();
                 Toast.makeText(getContext(), R.string.s_fragment_dashboard_alertMessage_loggedOut, Toast.LENGTH_SHORT).show();
-                //Todo fix to use fragment stack instead of ending activity
+                // TODO: Use Fragment stack instead of ending the Activity <-- Is this still an issue?
                 getActivity().finish();
                 break;
         }

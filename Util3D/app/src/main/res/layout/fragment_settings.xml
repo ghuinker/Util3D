@@ -1,23 +1,12 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:paddingEnd="16dp"
-    android:paddingStart="16dp"
     android:orientation="vertical"
+    android:paddingBottom="16dp"
+    android:paddingTop="16dp"
     tools:context="com.se319s18a9.util3d.Fragments.SettingsFragment">
-
-    <TextView
-    android:gravity="center"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
-    android:layout_marginTop="16dp"
-    android:paddingStart="16sp"
-    android:paddingEnd="16sp"
-    android:layout_width="match_parent"
-    android:text="@string/s_fragment_settings_title"
-    android:textSize="36sp"
-    android:textStyle="bold" />
 
     <Button
         android:background="@color/colorAccent"

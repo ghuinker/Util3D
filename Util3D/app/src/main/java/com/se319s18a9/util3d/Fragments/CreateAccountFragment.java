@@ -1,6 +1,5 @@
 package com.se319s18a9.util3d.Fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -15,31 +14,16 @@ import com.se319s18a9.util3d.backend.User;
 
 public class CreateAccountFragment extends Fragment implements View.OnClickListener {
 
-    OnAccountCreatedListener mCallback;
-
+    private EditText emailEditText;
     private EditText usernameEditText;
     private EditText passwordEditText;
+    private EditText repeatPasswordEditText;
 
     Button createButton;
     Button cancelButton;
 
-    public interface OnAccountCreatedListener {
-        void onAccountCreated(String username, String password);
-    }
-
     public CreateAccountFragment() {
         // Empty constructor
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        try {
-            mCallback = (OnAccountCreatedListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement OnAccountCreatedListener");
-        }
     }
 
     @Override
@@ -50,10 +34,16 @@ public class CreateAccountFragment extends Fragment implements View.OnClickListe
 
         View v = inflater.inflate(R.layout.fragment_createaccount, container, false);
 
+        // Set toolbar title
+
+        getActivity().setTitle("Create Account");
+
         // Initialize EditTexts and Buttons
 
+        emailEditText = v.findViewById(R.id.fragment_createAccount_editText_email);
         usernameEditText = v.findViewById(R.id.fragment_createAccount_editText_username);
         passwordEditText = v.findViewById(R.id.fragment_createAccount_editText_password);
+        repeatPasswordEditText = v.findViewById(R.id.fragment_createAccount_editText_repeatPassword);
 
         createButton = v.findViewById(R.id.fragment_createAccount_button_create);
         createButton.setOnClickListener(this);
@@ -68,23 +58,23 @@ public class CreateAccountFragment extends Fragment implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fragment_createAccount_button_create:
-                //Toast.makeText(this.getContext(), R.string.s_fragment_createAccount_debug_create, Toast.LENGTH_SHORT).show(); // DEBUG
+                if(getEditTextValue(passwordEditText).equals(getEditTextValue(repeatPasswordEditText))) {
+                    try {
+                        User.getInstance().createAccount(getEditTextValue(emailEditText), getEditTextValue(passwordEditText));
 
-                String username = this.getEditTextValue(usernameEditText);
-                String password = this.getEditTextValue(passwordEditText);
+                        if(!getEditTextValue(usernameEditText).isEmpty()) {
+                            User.getInstance().changeDisplayName(getEditTextValue(usernameEditText));
+                        }
+                    } catch(Exception e) {
+                        Toast.makeText(this.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
 
-                try{
-                    User.getInstance().createAccount(username, password);
-                    //TODO: verify this is correct way to do this
                     getActivity().getSupportFragmentManager().popBackStackImmediate();
-                }catch(Exception e){
-                    Toast.makeText(this.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(v.getContext(), R.string.s_fragment_createAccount_errorMessage_PasswordsNotMatching, Toast.LENGTH_SHORT).show();
                 }
-
                 break;
             case R.id.fragment_createAccount_button_cancel:
-                // TODO: Discard credentials and return to LoginFragment
-                //Toast.makeText(this.getContext(), R.string.s_fragment_createAccount_debug_cancel, Toast.LENGTH_SHORT).show(); // DEBUG
                 getActivity().onBackPressed();
                 break;
         }

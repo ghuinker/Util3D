@@ -18,10 +18,10 @@ import com.se319s18a9.util3d.backend.User;
 
 public class SettingsFragment extends Fragment implements View.OnClickListener {
 
-    private Button changePasswordButton;
-    private Button changeEmailButton;
-    private Button changeUsernameButton;
-    private Button deleteAccountButton;
+    Button changePasswordButton;
+    Button changeEmailButton;
+    Button changeUsernameButton;
+    Button deleteAccountButton;
 
     public SettingsFragment() {
         // Empty constructor
@@ -34,7 +34,17 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if (container != null) {
+            container.removeAllViews();
+        }
+
         View v = inflater.inflate(R.layout.fragment_settings, container, false);
+
+        // Set toolbar title
+
+        getActivity().setTitle(R.string.global_fragmentName_settings);
+
+        // Initialize components and bind listeners
 
         changePasswordButton = v.findViewById(R.id.fragment_settings_button_changePassword);
         changePasswordButton.setOnClickListener(this);
@@ -54,7 +64,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(final View v) {
-        if(v.getId()==R.id.fragment_settings_button_changePassword) {
+        if(v.getId() == R.id.fragment_settings_button_changePassword) {
             LayoutInflater layoutInflater = LayoutInflater.from(this.getContext());
             final View dialogView = layoutInflater.inflate(R.layout.dialog_changepassword, null);
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.getContext());
@@ -63,16 +73,19 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             alertDialogBuilder
                     .setPositiveButton(R.string.s_dialog_changePassword_changePasswordButton,
                             new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {}})
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // Leave empty
+                                }})
                     .setNegativeButton(R.string.s_dialog_changePassword_cancelButton,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     dialog.cancel();
                                 }
                             });
+
             final AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
-            alertDialog.getButton(alertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
+            alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if(((EditText) dialogView.findViewById(R.id.dialog_changePassword_editText_newPassword)).getText().toString().equals(
@@ -82,18 +95,16 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                             User.getInstance().changePassword(((EditText) dialogView.findViewById(R.id.dialog_changePassword_editText_newPassword)).getText().toString());
                             Toast.makeText(v.getContext(), R.string.s_dialog_changePassword_successMessage, Toast.LENGTH_SHORT).show();
                             alertDialog.dismiss();
-                        }
-                        catch(Exception e){
+                        } catch(Exception e){
                             Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
-                    }
-                    else {
+                    } else {
                         Toast.makeText(v.getContext(), R.string.s_dialog_changePassword_errorMessage_PasswordsNotMatching, Toast.LENGTH_SHORT).show();
                     }
                 }
             });
         }
-        else if (v.getId()==R.id.fragment_settings_button_changeEmail){
+        else if (v.getId() == R.id.fragment_settings_button_changeEmail) {
             LayoutInflater layoutInflater = LayoutInflater.from(this.getContext());
             final View dialogView = layoutInflater.inflate(R.layout.dialog_changeemail, null);
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.getContext());
@@ -109,10 +120,11 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                                     dialog.cancel();
                                 }
                             });
+
             ((TextView) dialogView.findViewById(R.id.dialog_changeEmail_textView_currentEmail)).setText(User.getInstance().getEmail());
             final AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
-            alertDialog.getButton(alertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
+            alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
                     if (((EditText) dialogView.findViewById(R.id.dialog_changeEmail_editText_newEmail)).getText().toString().equals(
@@ -149,10 +161,11 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                                     dialog.cancel();
                                 }
                             });
+
             ((TextView) dialogView.findViewById(R.id.dialog_changeUsername_textView_currentUsername)).setText(User.getInstance().getDisplayName());
             final AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
-            alertDialog.getButton(alertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     try {
@@ -181,16 +194,16 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                                     dialog.cancel();
                                 }
                             });
+
             final AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
-            alertDialog.getButton(alertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
+            alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
                     try {
                         User.getInstance().reauthenticate(((EditText) dialogView.findViewById(R.id.dialog_deleteAccount_editText_currentPassword)).getText().toString());
                         User.getInstance().deleteAccount();
                         Toast.makeText(v.getContext(), R.string.s_dialog_deleteAccount_successMessage, Toast.LENGTH_SHORT).show();
-                        //TODO: fix to use fragment stack instead of ending whole activity
                         getActivity().finish();
                         alertDialog.dismiss();
                     } catch (Exception e) {

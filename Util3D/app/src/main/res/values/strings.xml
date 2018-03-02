@@ -2,6 +2,13 @@
 
     <!-- Global Strings -->
     <string name="global_appName">Util3D</string>
+    <string name="global_fragmentName_createAccount">Create Account</string>
+    <string name="global_fragmentName_createProject">Create Project</string>
+    <string name="global_fragmentName_dashboard">Dashboard</string>
+    <string name="global_fragmentName_login">Login</string>
+    <string name="global_fragmentName_map">Map</string>
+    <string name="global_fragmentName_openProject">Open Project</string>
+    <string name="global_fragmentName_settings">Settings</string>
 
     <!-- LoginFragment Strings -->
     <string name="s_fragment_login_editText_hint_username">Email</string>
@@ -21,11 +28,14 @@
     <string name="s_fragment_createAccount_editText_hint_username">Username</string>
     <string name="s_fragment_createAccount_editText_hint_email">Email</string>
     <string name="s_fragment_createAccount_editText_hint_password">Password</string>
+    <string name="s_fragment_createAccount_editText_hint_repeatPassword">Repeat Password</string>
     <string name="s_fragment_createAccount_editText_hint_securityQuestion">Security Question</string>
     <string name="s_fragment_createAccount_editText_hint_securityAnswer">Security Answer</string>
     <string name="s_fragment_createAccount_button_clear">Clear</string>
     <string name="s_fragment_createAccount_button_create">Create</string>
     <string name="s_fragment_createAccount_button_cancel">Cancel</string>
+    <string name="s_fragment_createAccount_errorMessage_PasswordsNotMatching">Passwords do not match</string>
+    <string name="s_fragment_createAccount_errorMessage_usernameNotSet">Failed to set username. Try to change username in settings instead.</string>
     <!-- Error -->
     <string name="s_fragment_createAccount_errorMessage_fieldError">Field error!</string>
     <!-- Debug -->
@@ -34,11 +44,11 @@
 
     <!-- ForgotPassword Dialog Strings -->
     <string name="s_dialog_forgotPassword_title">Forgot Password</string>
-    <string name="s_dialog_forgotPassword_textEdit_emailInstructions">Enter your email to receive a password reset email:</string>
+    <string name="s_dialog_forgotPassword_textEdit_emailInstructions">Enter your email address to receive a password reset email.</string>
     <string name="s_dialog_forgotPassword_editText_hint_email">Email</string>
-    <string name="s_dialog_forgotPassword_button_sendEmail">Send reset email</string>
     <string name="s_dialog_forgotPassword_button_cancel">Cancel</string>
-    <string name="s_dialog_forgotPassword_successMessage">Reset email sent</string>
+    <string name="s_dialog_forgotPassword_button_sendEmail">Reset password</string>
+    <string name="s_dialog_forgotPassword_toast_successMessage">Reset email sent</string>
 
     <!-- DashboardFragment Strings -->
     <string name="s_fragment_dashboard_textView_filesPlaceholder">Files Fragment goes here.</string>
@@ -106,7 +116,7 @@
         <item>Sewage</item>
     </string-array>
 
-
-
+    <!-- MapFragment String-->
+    <string name="s_fragment_map_menu_togglemaptype">Toggle Map Type</string>
 
 </resources>
