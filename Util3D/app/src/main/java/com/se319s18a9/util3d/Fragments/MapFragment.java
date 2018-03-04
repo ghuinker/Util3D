@@ -2,16 +2,18 @@ package com.se319s18a9.util3d.Fragments;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.Bundle;
 
 import com.amulyakhare.textdrawable.TextDrawable;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.se319s18a9.util3d.R;
 
@@ -28,6 +30,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class MapFragment extends Fragment implements View.OnClickListener {
 
@@ -57,6 +61,8 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     boolean trackingEnabled = false;
     boolean utilitiesVisible = false;
 
+    ArrayList<MarkerOptions> markers = new ArrayList<>();
+
     public MapFragment() {
         // Empty constructor
     }
@@ -70,8 +76,8 @@ public class MapFragment extends Fragment implements View.OnClickListener {
         View v = inflater.inflate(R.layout.fragment_map, container, false);
 
         // Set toolbar title
-
-        getActivity().setTitle(R.string.global_fragmentName_map);
+        final Bundle bundle = getArguments();
+        getActivity().setTitle(bundle.getString("ProjectName"));
 
         // Initialize local variables
 
@@ -199,7 +205,16 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.fragment_map_fab_myLocation:
-                // TODO: Move camera to current GPS location
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+                for (MarkerOptions marker : markers) {
+                    builder.include(marker.getPosition());
+                }
+
+                LatLngBounds bounds = builder.build();
+
+                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 50); // padding = 50 px
+                googleMap.animateCamera(cu);
                 break;
             case R.id.fragment_map_fab_utilityType_water:
                 Toast.makeText(getContext(), "Water", Toast.LENGTH_SHORT).show();
@@ -304,26 +319,35 @@ public class MapFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onMapClick(LatLng point) {
                 if(trackingEnabled) {
+                    MarkerOptions marker;
                     switch(selectedUtility) {
                         case WATER:
-                            googleMap.addMarker(new MarkerOptions()
+                            marker = new MarkerOptions()
                                     .position(new LatLng(point.latitude, point.longitude))
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                            markers.add(marker);
+                            googleMap.addMarker(marker);
                             break;
                         case GAS:
-                            googleMap.addMarker(new MarkerOptions()
+                            marker = new MarkerOptions()
                                     .position(new LatLng(point.latitude, point.longitude))
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+                            markers.add(marker);
+                            googleMap.addMarker(marker);
                             break;
                         case ELECTRIC:
-                            googleMap.addMarker(new MarkerOptions()
+                            marker = new MarkerOptions()
                                     .position(new LatLng(point.latitude, point.longitude))
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+                            markers.add(marker);
+                            googleMap.addMarker(marker);
                             break;
                         case SEWAGE:
-                            googleMap.addMarker(new MarkerOptions()
+                            marker = new MarkerOptions()
                                     .position(new LatLng(point.latitude, point.longitude))
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                            markers.add(marker);
+                            googleMap.addMarker(marker);
                             break;
                     }
                 }
