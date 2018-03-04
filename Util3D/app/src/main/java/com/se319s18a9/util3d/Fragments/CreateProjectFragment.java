@@ -145,6 +145,14 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
                 this.location = getEditTextValue(locationEditText);
                 this.organization = getEditTextValue(organizationEditText);
 
+                //TODO this should help to see when utitilies is emtpy debug only
+                Toast.makeText(this.getContext(), this.utilitiesUsed.toString(), Toast.LENGTH_SHORT).show();
+                
+                if(fieldsAreEmpty()){
+                    Toast.makeText(this.getContext(), "Please Fill In all Fields", Toast.LENGTH_SHORT).show();
+                    break;
+                }
+
                 Fragment mapFragment = new MapFragment();
                 Bundle bundle = new Bundle();
                 bundle.putString("ProjectName", projectName);
@@ -158,14 +166,23 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
                 fragmentTransaction.addToBackStack(null).commit();
                 saveJSON();
 
-
             break;
 
-            // TODO: Make this an actual cancel method that returns to previous screen
             case R.id.fragment_createProject_button_cancel:
                 getFragmentManager().popBackStack();
                 break;
         }
+    }
+
+    private boolean fieldsAreEmpty() {
+        if(this.utilitiesUsed.isEmpty() ||
+                this.projectName.isEmpty() ||
+                this.organization.isEmpty() ||
+                this.location.isEmpty()){
+            return true;
+        }
+        else
+            return false;
     }
 
     /**
