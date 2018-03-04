@@ -10,13 +10,20 @@ import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class User {
     private static final User instance = new User();
     private FirebaseAuth mAuth;
+    private FirebaseDatabase mDatabase;
 
     private User() {
         mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance();
     }
 
     public static User getInstance(){
@@ -270,4 +277,35 @@ public class User {
             throw new Exception("No user logged in");
         }
     }
+
+    public Arraylist<String> getMyPersonalJSONStringNames(){
+
+    }
+
+    public String getSpecificJSONString(String path){
+        String json;
+        boolean done = false;
+
+    }
+
+    private void getDatabaseObject(String path, String json, boolean done){
+        final DatabaseReference tempRef = mDatabase.getReference(path);
+        tempRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                json = dataSnapshot.getValue();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void putSpecificJSONString(String path, String json){
+        DatabaseReference tempRef = mDatabase.getReference(path);
+        tempRef.setValue(json);
+    }
+
 }
