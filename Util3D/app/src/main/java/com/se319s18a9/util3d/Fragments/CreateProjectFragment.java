@@ -18,8 +18,12 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.se319s18a9.util3d.R;
+import com.se319s18a9.util3d.backend.User;
+import com.se319s18a9.util3d.database.StoreJSON;
 
 import java.util.ArrayList;
 
@@ -38,8 +42,30 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
     private String projectName;
     private String location;
 
+    private String JSONString = "test"; //Need JSON String from Mason
+
+    private DatabaseReference databaseReference;
+    private FirebaseAuth mAuth;
+
     public CreateProjectFragment() {
         // Empty constructor
+    }
+
+    public void saveJSON() {
+
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        String projectname = projectNameEditText.getText().toString().trim();
+        String orginizationname = organizationEditText.getText().toString().trim();
+        String locationname = locationEditText.getText().toString().trim();
+        String json = JSONString.trim();
+
+        StoreJSON storeJSON = new StoreJSON(projectname, orginizationname, locationname, json);
+        
+        databaseReference.child(User.getInstance().getUserID()).child("Projects").child(getProjectName()).setValue(storeJSON);
+
+        //Toast.makeText(this, "Information Updated",Toast.LENGTH_LONG).show();
+
     }
 
     @Override
@@ -130,6 +156,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.activity_main_frameLayout_root, mapFragment);
                 fragmentTransaction.addToBackStack(null).commit();
+                saveJSON();
 
 
             break;
@@ -254,4 +281,33 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
     private String getEditTextValue(EditText editText) {
         return editText.getText().toString();
     }
+
+    /**
+     * @return utility String
+     */
+    public ArrayList<String> getUtility(){
+        return utilitiesUsed;
+    }
+
+    /**
+     * @return orginization String
+     */
+    public String getOrginization(){
+        return organization;
+    }
+
+    /**
+     * @return projectname String
+     */
+    public String getProjectName(){
+        return projectName;
+    }
+
+    /**
+     * @return Orginization
+     */
+    public String getLocation(){
+        return location;
+    }
+
 }

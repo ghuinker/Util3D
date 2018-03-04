@@ -26,6 +26,10 @@
     <!-- CreateAccountFragment Strings -->
     <string name="s_fragment_createAccount_title">Create New Account</string>
     <string name="s_fragment_createAccount_editText_hint_username">Username</string>
+    <string name="s_fragment_createAccount_editText_hint_fullName">Name</string>
+    <string name="s_fragment_createAccount_editText_hint_companyName">Company Name</string>
+    <string name="s_fragment_createAccount_editText_hint_occupation">Occupation</string>
+    <string name="s_fragment_createAccount_editText_hint_phoneNumber">Phone Number</string>
     <string name="s_fragment_createAccount_editText_hint_email">Email</string>
     <string name="s_fragment_createAccount_editText_hint_password">Password</string>
     <string name="s_fragment_createAccount_editText_hint_repeatPassword">Repeat Password</string>
