@@ -147,7 +147,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
 
                 //TODO this should help to see when utitilies is emtpy debug only
                 Toast.makeText(this.getContext(), this.utilitiesUsed.toString(), Toast.LENGTH_SHORT).show();
-                
+
                 if(fieldsAreEmpty()){
                     Toast.makeText(this.getContext(), "Please Fill In all Fields", Toast.LENGTH_SHORT).show();
                     break;
