@@ -15,5 +15,9 @@
     <color name="colorGenericBlack">#000000</color>
     <color name="colorGenericRed">#FF0000</color>
     <color name="colorGenericWhite">#FFFFFF</color>
+    <color name="colorGenericBlue">#0000FF</color>
+    <color name="colorGenericOrange">#F39C12</color>
+    <color name="colorGenericYellow">#FFFF00</color>
+    <color name="colorGenericGreen">#00FF00</color>
 
 </resources>
