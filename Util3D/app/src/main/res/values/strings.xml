@@ -119,4 +119,7 @@
     <!-- MapFragment String-->
     <string name="s_fragment_map_menu_togglemaptype">Toggle Map Type</string>
 
+    <!-- OpenProjectFragment String-->
+    <string name="s_fragment_openproject_menu_toggledetailview">Toggle Detail View</string>
+
 </resources>

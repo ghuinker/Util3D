@@ -2,8 +2,12 @@ package com.se319s18a9.util3d.Fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -13,8 +17,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
 import com.se319s18a9.util3d.R;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,6 +34,7 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
 
     ListView listView;
     ArrayList<Project> projects;
+    ListViewAdapter adapter;
 
     @Override
     public void onAttach(Context context) {
@@ -43,14 +51,17 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
 
         listView = (ListView) v.findViewById(R.id.fragment_openproject_listview);
 
-        Project[] values = new Project[] {new Project(new Date(2018,3,4), "Name"), new Project(new Date(2018, 3, 5), "Second Name")};
+        Project[] values = new Project[] {
+                new Project("First Name", new Date(2018,3,4), new Date(2018, 3, 6), null),
+                new Project("Second Name", new Date(2018, 3, 5), new Date(2018, 3, 6), null)
+        };
 
         final ArrayList<Project> list = new ArrayList<Project>();
         for (int i = 0; i < values.length; ++i) {
             list.add(values[i]);
         }
 
-        ListViewAdapter adapter = new ListViewAdapter(v.getContext(), list);
+        adapter = new ListViewAdapter(v.getContext(), list, 0);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -70,10 +81,29 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
 
         Context context;
         ArrayList<Project> list;
+        int simpleViewID= R.layout.fragment_openproject_nameview;
+        int detailViewID = R.layout.fragment_openproject_detailview;
+        int currentView;
 
-        public ListViewAdapter(Context context, ArrayList<Project> list){
+
+        public ListViewAdapter(Context context, ArrayList<Project> list, int view){
             this.context = context;
             this.list = list;
+            setView(view);
+        }
+        public void toggleDetail(){
+            if(currentView == detailViewID){
+                currentView = simpleViewID;
+            } else {
+                currentView = detailViewID;
+            }
+        }
+        public void setView(int view){
+            switch(view){
+                case 0: currentView = simpleViewID; break;
+                case 1: currentView = detailViewID; break;
+                default: currentView = simpleViewID; break;
+            }
         }
         @Override
         public int getCount() {
@@ -93,16 +123,26 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
 
-            if (view == null) {
-                view = LayoutInflater.from(this.context).inflate(R.layout.fragment_openproject_nameview, viewGroup, false);
+                view = LayoutInflater.from(this.context).inflate(currentView, viewGroup, false);
+
+            if(currentView == detailViewID){
+                TextView itemName = (TextView) view.findViewById(R.id.fragment_openproject_detailname);
+                TextView itemUtilities = (TextView) view.findViewById(R.id.fragment_openproject_detailutilities);
+                TextView itemCreated = (TextView) view.findViewById(R.id.fragment_openproject_detailcreated);
+                TextView itemModified = (TextView) view.findViewById(R.id.fragment_openproject_detailmodified);
+
+                itemName.setText(list.get(i).name);
+                itemCreated.setText(list.get(i).created.toString());
+                itemModified.setText(list.get(i).modified.toString());
+
             }
 
-            // get the TextView for item name and item description
-            TextView textViewItemName = (TextView) view.findViewById(R.id.fragment_openproject_nameview);
-
-
-            //sets the text for item name
-            textViewItemName.setText(list.get(i).name);
+            else if(currentView == simpleViewID) {
+                // get the TextView for item name and item description
+                TextView textViewItemName = (TextView) view.findViewById(R.id.fragment_openproject_nameview);
+                textViewItemName.setText(list.get(i).name);
+            }
+            //TODO throw error if these cases aren't selected
 
             // returns the view for the current row
             return view;
@@ -110,12 +150,17 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
     }
 
     private class Project{
-        public Date date;
         public String name;
+        public Date created;
+        public Date modified;
+        public ArrayList<String> utilities;
 
-        public Project(Date date, String name){
+
+        public Project(String name, Date created, Date modified, ArrayList<String> utilities){
             this.name = name;
-            this.date = date;
+            this.created = created;
+            this.modified = modified;
+            this.utilities = utilities;
         }
 
         @Override
@@ -123,5 +168,30 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
             return name;
         }
 
+    }
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.toolbar_openproject_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.fragment_openproject_changeview:
+                adapter.toggleDetail();
+                adapter.notifyDataSetChanged();
+                Toast.makeText(getContext(), "Change View", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                Toast.makeText(getActivity(), "Something happened", Toast.LENGTH_SHORT).show();
+                return false;
+
+        }
     }
 }
