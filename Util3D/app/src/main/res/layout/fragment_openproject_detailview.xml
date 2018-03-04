@@ -26,17 +26,19 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginRight="6dp"
+        android:layout_marginLeft="6dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/fragment_openproject_detailcreated"/>
+            android:id="@+id/fragment_openproject_detailcreated" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/fragment_openproject_detailmodified"/>
+            android:id="@+id/fragment_openproject_detailmodified" />
 
 
     </LinearLayout>

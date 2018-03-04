@@ -115,11 +115,17 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
             case R.id.fragment_createProject_button_create:
 
                 //Sets Values for global fragment to the edit text value
-                this.organization = getEditTextValue(organizationEditText);
-                this.location = getEditTextValue(locationEditText);
                 this.projectName = getEditTextValue(projectNameEditText);
+                this.location = getEditTextValue(locationEditText);
+                this.organization = getEditTextValue(organizationEditText);
 
                 Fragment mapFragment = new MapFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("ProjectName", projectName);
+                bundle.putString("Location", location);
+                bundle.putString("Orginization", organization);
+                bundle.putStringArrayList("UtilitiesUsed", utilitiesUsed);
+                mapFragment.setArguments(bundle);
                 fragmentManager = getActivity().getSupportFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.activity_main_frameLayout_root, mapFragment);
@@ -130,18 +136,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
 
             // TODO: Make this an actual cancel method that returns to previous screen
             case R.id.fragment_createProject_button_cancel:
-                //Used solely for debugging
-                //Sets Values for global fragment to the edit text value
-                this.organization = getEditTextValue(organizationEditText);
-                this.location = getEditTextValue(locationEditText);
-                this.projectName = getEditTextValue(projectNameEditText);
-                //Used solely for debugging
-                StringBuilder proj = new StringBuilder();
-                proj.append("Project Name: "+ this.projectName + "\n");
-                proj.append("Organization: "+ this.organization + "\n");
-                proj.append("Project Location: " + this.location + "\n");
-                proj.append("Project Utilities: " + this.utilitiesUsed.toString() + "\n");
-                Toast.makeText(this.getContext(),proj.toString(), Toast.LENGTH_LONG).show();
+                getFragmentManager().popBackStack();
                 break;
         }
     }
