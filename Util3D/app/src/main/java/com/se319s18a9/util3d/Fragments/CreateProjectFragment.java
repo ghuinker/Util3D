@@ -149,7 +149,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
                 Bundle bundle = new Bundle();
                 bundle.putString("ProjectName", projectName);
                 bundle.putString("Location", location);
-                bundle.putString("Orginization", organization);
+                bundle.putString("Organization", organization);
                 bundle.putStringArrayList("UtilitiesUsed", utilitiesUsed);
                 mapFragment.setArguments(bundle);
                 fragmentManager = getActivity().getSupportFragmentManager();
