@@ -58,7 +58,6 @@ public class DashboardFragment extends Fragment implements View.OnClickListener 
                 fragmentTransaction.addToBackStack(null).commit();
                 break;
             case R.id.fragment_dashboard_button_openProject:
-                // TODO
                 break;
             case R.id.fragment_dashboard_button_settings:
                 Fragment settingsFragment = new SettingsFragment();

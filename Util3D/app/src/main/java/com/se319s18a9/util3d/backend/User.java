@@ -15,6 +15,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.se319s18a9.util3d.Fragments.LoadingFragment;
+
+import java.util.ArrayList;
 
 public class User {
     private static final User instance = new User();
@@ -278,34 +282,14 @@ public class User {
         }
     }
 
-    public Arraylist<String> getMyPersonalJSONStringNames(){
-
+    public ArrayList<String> getMyPersonalJSONStringNames(){
+        return null;
     }
 
-    public String getSpecificJSONString(String path){
-        String json;
-        boolean done = false;
-
+    public byte[] getFileFromFirebaseStorage(String path) {
+        //TODO: decide max file size, 10 mb currently
+        Task<byte[]> download = FirebaseStorage.getInstance().getReference(path).getBytes(10000000);
+        while(!download.isComplete());
+        return download.getResult();
     }
-
-    private void getDatabaseObject(String path, String json, boolean done){
-        final DatabaseReference tempRef = mDatabase.getReference(path);
-        tempRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                json = dataSnapshot.getValue();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    public void putSpecificJSONString(String path, String json){
-        DatabaseReference tempRef = mDatabase.getReference(path);
-        tempRef.setValue(json);
-    }
-
 }

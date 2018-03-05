@@ -1,8 +1,18 @@
 package com.se319s18a9.util3d.backend;
 
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.se319s18a9.util3d.Fragments.LoadingFragment;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -34,6 +44,7 @@ public class Map {
 
     private ArrayList<Line> initialLines;
     private ConnectedPoint current;
+    JSONObject stringFromFirebase[] = {null};
 
     public Map(){
         initialLines = new ArrayList<Line>();
@@ -86,5 +97,27 @@ public class Map {
                 failed = true;
             }
         }
+    }
+
+    public void getStringFromFirebase(String path, final LoadingFragment loadingFragment) {
+        final DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference(path);
+        tempRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                stringFromFirebase[0] = dataSnapshot.getValue(JSONObject.class);
+                loadingFragment.doneLoading();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        return;
+    }
+
+    public void putStringToFirebase(String path, String json){
+        DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference(path);
+        tempRef.setValue(json);
     }
 }
