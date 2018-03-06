@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
 import com.se319s18a9.util3d.Fragments.DashboardFragment;
+import com.se319s18a9.util3d.Fragments.MapFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,4 +34,14 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
+    @Override
+    public void onBackPressed() {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.activity_main_frameLayout_root);
+        if(fragment instanceof MapFragment) {
+            ((MapFragment) fragment).saveWithDialog(true);
+        }
+        else {
+            super.onBackPressed();
+        }
+    }
 }

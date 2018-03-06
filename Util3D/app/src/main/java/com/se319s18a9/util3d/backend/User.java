@@ -1,5 +1,8 @@
 package com.se319s18a9.util3d.backend;
 
+import android.support.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.EmailAuthProvider;
@@ -16,7 +19,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.se319s18a9.util3d.Fragments.LoadingFragment;
 
 import java.util.ArrayList;
 
@@ -282,14 +284,55 @@ public class User {
         }
     }
 
-    public ArrayList<String> getMyPersonalJSONStringNames(){
-        return null;
+    public void getMyPersonalFilenames(final ArrayList<String> filenames, final Runnable callback){
+        //TODO: setup permissions
+        //TODO: hanlde other locations (shared files)
+        final DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference("/users/"+mAuth.getUid()+"/files");
+        tempRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot temp:dataSnapshot.getChildren()) {
+                    filenames.add(temp.getKey());
+                }
+                //TODO: determine better way to do this
+                callback.run();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
-    public byte[] getFileFromFirebaseStorage(String path) {
+    public Task getFileFromFirebaseStorage(String path, final Runnable callback) {
         //TODO: decide max file size, 10 mb currently
-        Task<byte[]> download = FirebaseStorage.getInstance().getReference(path).getBytes(10000000);
-        while(!download.isComplete());
-        return download.getResult();
+        //TODO: setup permissions
+        //TODO: hanlde other locations (shared files)
+        final Task<byte[]> download = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path).getBytes(10000000);
+        download.addOnCompleteListener(new OnCompleteListener<byte[]>() {
+            @Override
+            public void onComplete(@NonNull Task<byte[]> task) {
+                callback.run();
+            }
+        });
+        //TODO: dont't block UI thread, handle failure
+        return download;
+    }
+
+    public Task writeFileToFirebaseStorage(String path, byte[] file, final Runnable callback){
+        //TODO: setup permissions
+        //TODO: hanlde other locations (shared files)
+        DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path);
+        tempRef.setValue(true);
+        Task upload = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path).putBytes(file);
+        //TODO: dont't block UI thread, handle failure
+        upload.addOnCompleteListener(new OnCompleteListener<byte[]>() {
+            @Override
+            public void onComplete(@NonNull Task task) {
+                callback.run();
+            }
+        });
+        return upload;
     }
 }
