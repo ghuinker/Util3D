@@ -111,8 +111,6 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
             utilities.add(new Utility(utilityName, true));
         }
 
-        updateUtilitiesChecked();
-
         // Create an array from utilities ArrayList to be passed into MultiSpinner adapter
 
         Utility[] utilArr = new Utility[utilities.size()];
@@ -123,6 +121,8 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
         MultiSpinnerAdapter adapter = new MultiSpinnerAdapter(this.getContext(), R.layout.fragment_spinneritem, R.id.fragment_spinnerItem_textView, utilArr);
         utilitiesSpinner.setAdapter(adapter);
         utilitiesUsed = new ArrayList<>();
+
+        updateUtilitiesChecked();
 
         return v;
     }
@@ -145,9 +145,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
                 this.location = getEditTextValue(locationEditText);
                 this.organization = getEditTextValue(organizationEditText);
 
-                //TODO this should help to see when utitilies is emtpy debug only
-                Toast.makeText(this.getContext(), this.utilitiesUsed.toString(), Toast.LENGTH_SHORT).show();
-
+                //If fields are empty return don't let user create project
                 if(fieldsAreEmpty()){
                     Toast.makeText(this.getContext(), "Please Fill In all Fields", Toast.LENGTH_SHORT).show();
                     break;
