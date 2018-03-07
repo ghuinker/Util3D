@@ -313,7 +313,13 @@ public class User {
                     if(filename!=null&&!filename.equals("")) {
                         Task<StorageMetadata> storageMetadataTask = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+filename).getMetadata();
                         //It's ok to wait here. This happens in background thread.
-                        while(!storageMetadataTask.isComplete());
+                        while(!storageMetadataTask.isComplete()){
+                            try {
+                                Thread.sleep(10);
+                            }catch(InterruptedException e){
+
+                            }
+                        }
                         if(storageMetadataTask.isSuccessful()) {
                             StorageMetadata storageMetadata = storageMetadataTask.getResult();
                             Date created = new Date(storageMetadata.getCreationTimeMillis());
@@ -343,20 +349,65 @@ public class User {
         return exception;
     }
 
-    public Task getFileFromFirebaseStorage(String path, final Runnable callback) {
-        //TODO: decide max file size, 10 mb currently
-        final Task<byte[]> downloadTask = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path).getBytes(10000000);
-        downloadTask.addOnCompleteListener(new OnCompleteListener<byte[]>() {
-            @Override
-            public void onComplete(@NonNull Task<byte[]> task) {
-                callback.run();
+    public CustomAsyncTask readMapFromFirebaseStorage(String givenPath, Map givenMap, final Runnable givenCallback, Activity givenActivity){
+        //TODO: Allow upload operation to be cancelled. If operation stalls (for example, due to no internet), application will hang until firebase calls succeed
+        class MapFromJSONTask extends CustomAsyncTask{
+            boolean complete = false;
+            boolean successful = false;
+            Exception exception = null;
+            String path;
+            Map map;
+            Runnable callback;
+            Activity activity;
+
+            public MapFromJSONTask(String givenPath, Map givenMap, final Runnable givenCallback, Activity givenActivity){
+                path = givenPath;
+                map = givenMap;
+                callback = givenCallback;
+                activity = givenActivity;
             }
-        });
-        return downloadTask;
+
+            public boolean isComplete(){
+                return complete;
+            }
+
+            public boolean isSuccessful(){
+                return successful;
+            }
+
+            public Exception getException(){
+                return exception;
+            }
+
+            public void run() {
+                byte[] json;
+                try{
+                    final Task<byte[]> downloadTask = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path).getBytes(10000000);
+                    while(!downloadTask.isComplete()){
+                        Thread.sleep(100);
+                    }
+                    exception = downloadTask.getException();
+                    if(exception!=null) {
+                        throw exception;
+                    }
+                    map.readFromJSON(new String(downloadTask.getResult()));
+                    successful = true;
+                }catch(Exception e){
+                    exception = e;
+                    successful = false;
+                }
+                complete = true;
+                activity.runOnUiThread(callback);
+            }
+        }
+
+        MapFromJSONTask mapFromJSONTask = new MapFromJSONTask(givenPath, givenMap, givenCallback, givenActivity);
+        mapFromJSONTask.start();
+        return mapFromJSONTask;
     }
 
     public CustomAsyncTask writeMapToFirebaseStorage(String givenPath, Map givenMap, final Runnable givenCallback, Activity givenActivity){
-        //TODO:Allow upload operation to be cancelled. If operation stalls (for example, due to no internet), application will hang until firebase calls succeed
+        //TODO: Allow upload operation to be cancelled. If operation stalls (for example, due to no internet), application will hang until firebase calls succeed
         class MapToJSONTask extends CustomAsyncTask{
             boolean complete = false;
             boolean successful = false;
@@ -370,9 +421,6 @@ public class User {
                 path = givenPath;
                 map = givenMap;
                 callback = givenCallback;
-                boolean complete;
-                boolean successful;
-                Exception exception;
                 activity = givenActivity;
             }
 

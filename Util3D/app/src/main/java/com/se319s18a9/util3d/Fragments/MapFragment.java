@@ -59,9 +59,8 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     MapView mMapView;
     private GoogleMap googleMap;
     Map graph;
-    Task<byte []> download;
-    Task upload;
     CustomAsyncTask customUpload;
+    CustomAsyncTask customDownload;
     LoadingDialogFragment loadingDialogFragment;
     String filename;
 
@@ -114,7 +113,7 @@ public class MapFragment extends Fragment implements View.OnClickListener {
             filename = "newfile";
         }
         if(loadFromFile) {
-            download = User.getInstance().getFileFromFirebaseStorage(filename, this::loadDownloadedMap);
+            customDownload = User.getInstance().readMapFromFirebaseStorage(filename, graph, this::loadDownloadedMap, getActivity());
             loadingDialogFragment = new LoadingDialogFragment();
             loadingDialogFragment.setCancelable(false);
             Bundle messageArgument = new Bundle();
@@ -125,6 +124,7 @@ public class MapFragment extends Fragment implements View.OnClickListener {
         else{
             //blank map
             //will need to add lines somewhere in onclick to prevent crash
+            graph.setSavedPoint(graph.addNewLine("Electric").getNullHeadPoint());
         }
     }
 
@@ -415,10 +415,9 @@ public class MapFragment extends Fragment implements View.OnClickListener {
 
     public void loadDownloadedMap(){
         try {
-            if(download.getException()!=null){
-                throw download.getException();
+            if(!customDownload.isSuccessful()){
+                throw customDownload.getException();
             }
-            graph.readFromJSON(new String(download.getResult()));
             LoadingDialogFragment temp = loadingDialogFragment;
             loadingDialogFragment = null;
             temp.dismiss();
@@ -468,11 +467,10 @@ public class MapFragment extends Fragment implements View.OnClickListener {
             Bundle messageArgument = new Bundle();
             if(exitAfterSave) {
                 messageArgument.putString("message", "Saving and exiting");
-                //upload = User.getInstance().writeFileToFirebaseStorage(filename, graph.writeToJSON().getBytes(),this::saveAndExitCallback);
                 customUpload = User.getInstance().writeMapToFirebaseStorage(filename, graph, this::saveAndExitCallback, getActivity());
             }else{
                 messageArgument.putString("message", "Saving map");
-                upload = User.getInstance().writeFileToFirebaseStorage(filename, graph.writeToJSON().getBytes(),this::saveCallback);
+                customUpload = User.getInstance().writeMapToFirebaseStorage(filename, graph, this::saveCallback, getActivity());
             }
             loadingDialogFragment.setArguments(messageArgument);
             loadingDialogFragment.show(getActivity().getFragmentManager(), null);
