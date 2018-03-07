@@ -4,8 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,20 +11,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.Projection;
 import com.se319s18a9.util3d.R;
-
-import org.w3c.dom.Text;
+import com.se319s18a9.util3d.backend.Project;
+import com.se319s18a9.util3d.backend.User;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Created by ghuin on 3/1/2018.
@@ -37,11 +31,37 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
     ListView listView;
     ArrayList<Project> projects;
     ListViewAdapter adapter;
+    LoadingDialogFragment loadingDialogFragment;
+    Exception[] loadProjectListException;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
     }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+        projects = new ArrayList<>();
+
+        loadingDialogFragment = new LoadingDialogFragment();
+        loadingDialogFragment.setCancelable(false);
+        Bundle messageArgument = new Bundle();
+        messageArgument.putString("message", "Loading Projects");
+        loadingDialogFragment.setArguments(messageArgument);
+        loadProjectListException = User.getInstance().getMyPersonalProjects(projects, this::updateFileList);
+        loadingDialogFragment.show(getActivity().getFragmentManager(), null);
+    }
+
+    public void updateFileList(){
+        loadingDialogFragment.dismiss();
+        adapter.notifyDataSetChanged();
+        if(loadProjectListException[0]!=null) {
+            Toast.makeText(getContext(), loadProjectListException[0].getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -51,32 +71,32 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
 
         View v = inflater.inflate(R.layout.fragment_openproject, container, false);
 
+        getActivity().setTitle(R.string.global_fragmentName_openProject);
+
         listView = (ListView) v.findViewById(R.id.fragment_openproject_listview);
 
-        Project[] values = new Project[] {
-                new Project("First Name", new Date(2018,3,4), new Date(2018, 3, 6), null),
-                new Project("Second Name", new Date(2018, 3, 5), new Date(2018, 3, 6), null)
-        };
+        //Project[] values = new Project[] {
+        //        new Project("First Name", new Date(2018,3,4), new Date(2018, 3, 6), null),
+        //        new Project("Second Name", new Date(2018, 3, 5), new Date(2018, 3, 6), null)
+        //};
 
-        final ArrayList<Project> list = new ArrayList<Project>();
-        for (int i = 0; i < values.length; ++i) {
-            list.add(values[i]);
-        }
+        //final ArrayList<Project> list = new ArrayList<Project>();
+        //for (int i = 0; i < values.length; ++i) {
+        //    list.add(values[i]);
+        //}
 
-        adapter = new ListViewAdapter(v.getContext(), list, 0);
+        adapter = new ListViewAdapter(v.getContext(), projects, 0);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(getContext(), adapterView.getItemAtPosition(i).toString(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(), adapterView.getItemAtPosition(i).toString(), Toast.LENGTH_SHORT).show();
                 Fragment mapFragment = new MapFragment();
                 Bundle bundle = new Bundle();
+                bundle.putBoolean("LoadMap", true);
                 bundle.putString("ProjectName", adapterView.getItemAtPosition(i).toString());
                 mapFragment.setArguments(bundle);
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.activity_main_frameLayout_root, mapFragment);
-                fragmentTransaction.addToBackStack(null).commit();
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.activity_main_frameLayout_root, mapFragment).addToBackStack(null).commit();
             }
         });
 
@@ -159,31 +179,6 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
         }
     }
 
-    private class Project{
-        public String name;
-        public Date created;
-        public Date modified;
-        public ArrayList<String> utilities;
-
-
-        public Project(String name, Date created, Date modified, ArrayList<String> utilities){
-            this.name = name;
-            this.created = created;
-            this.modified = modified;
-            this.utilities = utilities;
-        }
-
-        @Override
-        public String toString(){
-            return name;
-        }
-
-    }
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolbar_openproject_menu, menu);

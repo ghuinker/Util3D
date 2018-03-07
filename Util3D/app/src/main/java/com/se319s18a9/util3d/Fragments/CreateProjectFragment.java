@@ -156,13 +156,14 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
                 bundle.putString("ProjectName", projectName);
                 bundle.putString("Location", location);
                 bundle.putString("Organization", organization);
+                bundle.putBoolean("LoadMap", false);
                 bundle.putStringArrayList("UtilitiesUsed", utilitiesUsed);
                 mapFragment.setArguments(bundle);
                 fragmentManager = getActivity().getSupportFragmentManager();
-                fragmentManager.popBackStack();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.activity_main_frameLayout_root, mapFragment);
                 fragmentTransaction.addToBackStack(null).commit();
+                //TODO: Why is this here?
                 saveJSON();
 
             break;

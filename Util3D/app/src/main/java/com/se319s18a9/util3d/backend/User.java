@@ -1,5 +1,10 @@
 package com.se319s18a9.util3d.backend;
 
+import android.app.Activity;
+import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.EmailAuthProvider;
@@ -10,13 +15,28 @@ import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Date;
 
 public class User {
     private static final User instance = new User();
     private FirebaseAuth mAuth;
+    private FirebaseDatabase mDatabase;
 
     public User() {
         mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance();
     }
 
     public static User getInstance(){
@@ -273,5 +293,192 @@ public class User {
         else {
             throw new Exception("No user logged in");
         }
+    }
+
+    /**
+     *
+     * @return An array of length 1 containing the exception thrown by the database query.
+     * Note that the only reason I am returning an array is so that I can pass a reference to an
+     * exception that does not yet and may not ever actually exist
+     */
+    public Exception[] getMyPersonalProjects(final ArrayList<Project> projects, final Runnable callback){
+        final DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference("/users/"+mAuth.getUid()+"/files");
+        Exception[] exception = {null};
+        tempRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot temp:dataSnapshot.getChildren()) {
+                    //TODO: store filenames as values, not keys, check for null values
+                    String filename = temp.getKey();
+                    if(filename!=null&&!filename.equals("")) {
+                        Task<StorageMetadata> storageMetadataTask = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+filename).getMetadata();
+                        //It's ok to wait here. This happens in background thread.
+                        while(!storageMetadataTask.isComplete()){
+                            try {
+                                Thread.sleep(10);
+                            }catch(InterruptedException e){
+
+                            }
+                        }
+                        if(storageMetadataTask.isSuccessful()) {
+                            StorageMetadata storageMetadata = storageMetadataTask.getResult();
+                            Date created = new Date(storageMetadata.getCreationTimeMillis());
+                            Date updated = new Date(storageMetadata.getUpdatedTimeMillis());
+                            //TODO: store utility type in database, retrieve here
+                            projects.add(new Project(filename, created, updated, null));
+                        }
+                        else{
+                            exception[0] = new Exception("A file in database file list does not exist in storage");
+                        }
+
+                    }
+                    else
+                    {
+                        exception[0] = new Exception("Blank or Null Filename Error");
+                    }
+                }
+                callback.run();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                exception[0] = databaseError.toException();
+                callback.run();
+            }
+        });
+        return exception;
+    }
+
+    public CustomAsyncTask readMapFromFirebaseStorage(String givenPath, Map givenMap, final Runnable givenCallback, Activity givenActivity){
+        //TODO: Allow upload operation to be cancelled. If operation stalls (for example, due to no internet), application will hang until firebase calls succeed
+        class MapFromJSONTask extends CustomAsyncTask{
+            boolean complete = false;
+            boolean successful = false;
+            Exception exception = null;
+            String path;
+            Map map;
+            Runnable callback;
+            Activity activity;
+
+            public MapFromJSONTask(String givenPath, Map givenMap, final Runnable givenCallback, Activity givenActivity){
+                path = givenPath;
+                map = givenMap;
+                callback = givenCallback;
+                activity = givenActivity;
+            }
+
+            public boolean isComplete(){
+                return complete;
+            }
+
+            public boolean isSuccessful(){
+                return successful;
+            }
+
+            public Exception getException(){
+                return exception;
+            }
+
+            public void run() {
+                byte[] json;
+                try{
+                    final Task<byte[]> downloadTask = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path).getBytes(10000000);
+                    while(!downloadTask.isComplete()){
+                        Thread.sleep(100);
+                    }
+                    exception = downloadTask.getException();
+                    if(exception!=null) {
+                        throw exception;
+                    }
+                    map.readFromJSON(new String(downloadTask.getResult()));
+                    successful = true;
+                }catch(Exception e){
+                    exception = e;
+                    successful = false;
+                }
+                complete = true;
+                activity.runOnUiThread(callback);
+            }
+        }
+
+        MapFromJSONTask mapFromJSONTask = new MapFromJSONTask(givenPath, givenMap, givenCallback, givenActivity);
+        mapFromJSONTask.start();
+        return mapFromJSONTask;
+    }
+
+    public CustomAsyncTask writeMapToFirebaseStorage(String givenPath, Map givenMap, final Runnable givenCallback, Activity givenActivity){
+        //TODO: Allow upload operation to be cancelled. If operation stalls (for example, due to no internet), application will hang until firebase calls succeed
+        class MapToJSONTask extends CustomAsyncTask{
+            boolean complete = false;
+            boolean successful = false;
+            Exception exception = null;
+            String path;
+            Map map;
+            Runnable callback;
+            Activity activity;
+
+            public MapToJSONTask(String givenPath, Map givenMap, final Runnable givenCallback, Activity givenActivity){
+                path = givenPath;
+                map = givenMap;
+                callback = givenCallback;
+                activity = givenActivity;
+            }
+
+            public boolean isComplete(){
+                return complete;
+            }
+
+            public boolean isSuccessful(){
+                return successful;
+            }
+
+            public Exception getException(){
+                return exception;
+            }
+
+            public void run() {
+                byte[] json;
+                try{
+                    json = map.writeToJSON().getBytes();
+                    DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path);
+                    final boolean[] databaseWriteCompleted = {false};
+                    DatabaseReference.CompletionListener completionListener = new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                            if(databaseError!=null) {
+                                exception = databaseError.toException();
+                            }
+                            databaseWriteCompleted[0] = true;
+                        }
+                    };
+                    tempRef.setValue(true, completionListener);
+                    while(!databaseWriteCompleted[0]){
+                        Thread.sleep(100);
+                    }
+                    if(exception!=null)
+                    {
+                        throw exception;
+                    }
+                    Task upload = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path).putBytes(json);
+                    while(!upload.isComplete()){
+                        Thread.sleep(100);
+                    }
+                    exception = upload.getException();
+                    if(exception!=null) {
+                        throw exception;
+                    }
+                    successful = true;
+                }catch(Exception e){
+                    exception = e;
+                    successful = false;
+                }
+                complete = true;
+                activity.runOnUiThread(callback);
+            }
+        }
+
+        MapToJSONTask mapToJSONTask = new MapToJSONTask(givenPath, givenMap, givenCallback, givenActivity);
+        mapToJSONTask.start();
+        return mapToJSONTask;
     }
 }

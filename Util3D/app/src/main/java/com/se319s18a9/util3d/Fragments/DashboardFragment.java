@@ -64,14 +64,14 @@ public class DashboardFragment extends Fragment implements View.OnClickListener 
                 fragmentManager = getActivity().getSupportFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.activity_main_frameLayout_root, createProjectFragment);
-                fragmentTransaction.addToBackStack(null).commit();
+                fragmentTransaction.addToBackStack("dashboardIdentifier").commit();
                 break;
             case R.id.fragment_dashboard_button_openProject:
                 Fragment openProjectFragment = new OpenProjectFragment();
                 fragmentManager = getActivity().getSupportFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.activity_main_frameLayout_root, openProjectFragment);
-                fragmentTransaction.addToBackStack(null).commit();
+                fragmentTransaction.addToBackStack("dashboardIdentifier").commit();
                 break;
             case R.id.fragment_dashboard_button_settings:
                 Fragment settingsFragment = new SettingsFragment();

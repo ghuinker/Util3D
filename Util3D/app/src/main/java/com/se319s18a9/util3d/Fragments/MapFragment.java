@@ -1,6 +1,7 @@
 package com.se319s18a9.util3d.Fragments;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
@@ -13,21 +14,32 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.se319s18a9.util3d.R;
+import com.se319s18a9.util3d.backend.ConnectedPoint;
+import com.se319s18a9.util3d.backend.CustomAsyncTask;
+import com.se319s18a9.util3d.backend.Line;
+import com.se319s18a9.util3d.backend.Map;
+import com.se319s18a9.util3d.backend.User;
 
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +49,11 @@ public class MapFragment extends Fragment implements View.OnClickListener {
 
     MapView mMapView;
     private GoogleMap googleMap;
+    Map graph;
+    CustomAsyncTask customUpload;
+    CustomAsyncTask customDownload;
+    LoadingDialogFragment loadingDialogFragment;
+    String filename;
 
     FloatingActionButton myLocationFab;
 
@@ -65,6 +82,41 @@ public class MapFragment extends Fragment implements View.OnClickListener {
 
     public MapFragment() {
         // Empty constructor
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+        graph = new Map();
+        boolean loadFromFile;
+        filename = null;
+        if(getArguments()!=null){
+            loadFromFile=getArguments().getBoolean("LoadMap");
+            filename = getArguments().getString("ProjectName");
+        }
+        else{
+            loadFromFile = false;
+        }
+        if(filename==null)
+        {
+            //TODO: generate non-conflicting name
+            filename = "newfile";
+        }
+        if(loadFromFile) {
+            customDownload = User.getInstance().readMapFromFirebaseStorage(filename, graph, this::loadDownloadedMap, getActivity());
+            loadingDialogFragment = new LoadingDialogFragment();
+            loadingDialogFragment.setCancelable(false);
+            Bundle messageArgument = new Bundle();
+            messageArgument.putString("message", "Loading Map");
+            loadingDialogFragment.setArguments(messageArgument);
+            loadingDialogFragment.show(getActivity().getFragmentManager(), null);
+        }
+        else{
+            //blank map
+            //will need to add lines somewhere in onclick to prevent crash
+            graph.setSavedPoint(graph.addNewLine("Electric").getNullHeadPoint());
+        }
     }
 
     @Override
@@ -135,7 +187,9 @@ public class MapFragment extends Fragment implements View.OnClickListener {
                 googleMap = mMap;
 
                 initializeMapOnClickListener();
+                renderFromScratch();
 
+                //TODO: I dislike this if return structure. Integrate this if statement with the one below.
                 // For showing a move to my location button
                 if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     // TODO: Consider calling
@@ -151,25 +205,12 @@ public class MapFragment extends Fragment implements View.OnClickListener {
                 if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     mMap.setMyLocationEnabled(true);
                 }
-
-//                // For dropping a marker at a point on the Map
-//                LatLng sydney = new LatLng(-34, 151);
-//                googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker Title").snippet("Marker Description"));
-//
-//                // For zooming automatically to the location of the marker
-//                CameraPosition cameraPosition = new CameraPosition.Builder().target(sydney).zoom(12).build();
-//                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             }
         });
 
         return v;
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolbar_map_menu, menu);
@@ -314,45 +355,213 @@ public class MapFragment extends Fragment implements View.OnClickListener {
         mMapView.onLowMemory();
     }
 
+    private class PointAndPolyline{
+        private ConnectedPoint savedPoint;
+        private Polyline savedPoly;
+
+        PointAndPolyline(ConnectedPoint point, Polyline poly){
+            savedPoint = point;
+            savedPoly = poly;
+        }
+
+        public ConnectedPoint getConnectedPoint()
+        {
+            return savedPoint;
+        }
+
+        public Polyline getSavedPoly()
+        {
+            return savedPoly;
+        }
+    }
+
+    private void renderPoint(ConnectedPoint point){
+        graph.setSavedPoint(point);
+        if(!point.isRoot()) {
+            MarkerOptions markerOptions = new MarkerOptions().position(point.getLatLng());
+            markers.add(markerOptions);
+            Marker marker = googleMap.addMarker(markerOptions);
+            Polyline polyline = null;
+            if(!point.getParentPoint().isRoot()) {
+                PolylineOptions polylineOptions = new PolylineOptions().add(point.getParentPoint().getLatLng(), point.getLatLng());
+                polyline = googleMap.addPolyline(polylineOptions);
+            }
+            marker.setTag(new PointAndPolyline(point, polyline));
+        }
+        if(point.getChildren()!=null){
+            int childPointIndex = 0;
+            while(childPointIndex<point.getChildren().size())
+            {
+                renderPoint(point.getChildren().get(childPointIndex));
+                childPointIndex++;
+            }
+        }
+    }
+
+    private void renderFromScratch(){
+        googleMap.clear();
+        for (Line line:graph.getLines()) {
+            renderPoint(line.getNullHeadPoint());
+        }
+    }
+
+    public void loadDownloadedMap(){
+        try {
+            if(!customDownload.isSuccessful()){
+                throw customDownload.getException();
+            }
+            LoadingDialogFragment temp = loadingDialogFragment;
+            loadingDialogFragment = null;
+            temp.dismiss();
+            //TODO: remove?
+            //This would be needed if the google map became ready before this step was reached
+            //I believe this is technically possible but unlikely to happen
+            if(googleMap!=null) {
+                renderFromScratch();
+            }
+        }
+        catch(Exception e){
+            LoadingDialogFragment temp = loadingDialogFragment;
+            loadingDialogFragment = null;
+            temp.dismiss();
+            Toast.makeText(getContext(), "Failed to load map. Encountered the following exception: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            getActivity().getSupportFragmentManager().popBackStackImmediate();
+        }
+    }
+
+    public void saveCallback() {
+        saveOrExit(false);
+    }
+
+    public void saveAndExitCallback(){
+        saveOrExit(true);
+    }
+
+    private void saveOrExit(boolean saveAndExit) {
+        LoadingDialogFragment temp = loadingDialogFragment;
+        loadingDialogFragment = null;
+        temp.dismiss();
+        if(!customUpload.isSuccessful()){
+            Toast.makeText(getContext(), "Upload Failed", Toast.LENGTH_LONG).show();
+        }
+        else if(saveAndExit){
+            getActivity().getSupportFragmentManager().popBackStackImmediate("dashboardIdentifier", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
+    }
+
+    private void dialogSaveHelper(AlertDialog dialog, String newFilename, boolean exitAfterSave)
+    {
+        filename = newFilename;
+        dialog.dismiss();
+        try{
+            loadingDialogFragment = new LoadingDialogFragment();
+            loadingDialogFragment.setCancelable(false);
+            Bundle messageArgument = new Bundle();
+            if(exitAfterSave) {
+                messageArgument.putString("message", "Saving and exiting");
+                customUpload = User.getInstance().writeMapToFirebaseStorage(filename, graph, this::saveAndExitCallback, getActivity());
+            }else{
+                messageArgument.putString("message", "Saving map");
+                customUpload = User.getInstance().writeMapToFirebaseStorage(filename, graph, this::saveCallback, getActivity());
+            }
+            loadingDialogFragment.setArguments(messageArgument);
+            loadingDialogFragment.show(getActivity().getFragmentManager(), null);
+        }
+        catch(Exception e){
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void saveWithDialog(boolean exitAfterSave){
+        LayoutInflater layoutInflater = LayoutInflater.from(this.getContext());
+        final View dialogView = layoutInflater.inflate(R.layout.dialog_savemap, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.getContext());
+        //TODO: fill with current filename
+        ((EditText) dialogView.findViewById(R.id.dialog_saveMap_editText_filename)).setText(filename);
+        if(exitAfterSave){
+            alertDialogBuilder.setTitle("Save and Exit");
+            ((TextView) dialogView.findViewById(R.id.dialog_saveMap_textView_prompt)).setText("Would you like to save before exiting?");
+        }
+        else
+        {
+            alertDialogBuilder.setTitle("Save");
+            ((TextView) dialogView.findViewById(R.id.dialog_saveMap_textView_prompt)).setText("Would you like to save?");
+        }
+        alertDialogBuilder.setView(dialogView);
+        alertDialogBuilder
+                .setPositiveButton("Yes",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialogSaveHelper((AlertDialog) dialog, ((EditText) dialogView.findViewById(R.id.dialog_saveMap_editText_filename)).getText().toString(), exitAfterSave);
+                            }
+                        })
+                .setNegativeButton("No",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                getActivity().getSupportFragmentManager().popBackStackImmediate("dashboardIdentifier", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                            }
+                        });
+        final AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
     private void initializeMapOnClickListener() {
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {
                 if(trackingEnabled) {
-                    MarkerOptions marker;
+                    ConnectedPoint currentPoint = graph.getSavedPoint().addAChild(point.latitude, point.longitude);
+                    MarkerOptions markerOptions = new MarkerOptions().position(currentPoint.getLatLng());
+
+                    //TODO: set polyline color and make markers look better
                     switch(selectedUtility) {
                         case WATER:
-                            marker = new MarkerOptions()
-                                    .position(new LatLng(point.latitude, point.longitude))
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-                            markers.add(marker);
-                            googleMap.addMarker(marker);
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                             break;
                         case GAS:
-                            marker = new MarkerOptions()
-                                    .position(new LatLng(point.latitude, point.longitude))
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-                            markers.add(marker);
-                            googleMap.addMarker(marker);
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
                             break;
                         case ELECTRIC:
-                            marker = new MarkerOptions()
-                                    .position(new LatLng(point.latitude, point.longitude))
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
-                            markers.add(marker);
-                            googleMap.addMarker(marker);
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
                             break;
                         case SEWAGE:
-                            marker = new MarkerOptions()
-                                    .position(new LatLng(point.latitude, point.longitude))
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                            markers.add(marker);
-                            googleMap.addMarker(marker);
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
                             break;
                     }
+
+                    markers.add(markerOptions);
+
+                    Marker marker = googleMap.addMarker(markerOptions);
+                    Polyline polyline = null;
+                    if(!currentPoint.getParentPoint().isRoot())
+                    {
+                        PolylineOptions polylineOptions = new PolylineOptions().add(currentPoint.getParentPoint().getLatLng(),currentPoint.getLatLng());
+                        polyline = googleMap.addPolyline(polylineOptions);
+                    }
+                    marker.setTag(new PointAndPolyline(currentPoint,polyline));
+                    graph.setSavedPoint(currentPoint);
+
+                    //String logMessage;
+                    //try {
+                    //    logMessage = graph.writeToJSON();
+                    //} catch(JSONException e)
+                    //{
+                    //    logMessage = "Failed to write to JSON";
+                    //}
+                    //Log.d("MapJSON",Arrays.toString(logMessage.getBytes()));
                 }
             }
         });
+
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                graph.setSavedPoint(((PointAndPolyline) marker.getTag()).getConnectedPoint());
+                return false;
+            }
+        });
+
+    //TODO: Add marker drag listener
     }
 
     // Helper methods
