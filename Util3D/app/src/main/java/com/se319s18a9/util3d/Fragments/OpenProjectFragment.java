@@ -38,6 +38,7 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
     ArrayList<Project> projects;
     ListViewAdapter adapter;
     LoadingDialogFragment loadingDialogFragment;
+    Exception[] loadProjectListException;
 
     @Override
     public void onAttach(Context context) {
@@ -55,13 +56,16 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
         Bundle messageArgument = new Bundle();
         messageArgument.putString("message", "Loading Projects");
         loadingDialogFragment.setArguments(messageArgument);
-        User.getInstance().getMyPersonalProjects(projects, this::updateFileList);
+        loadProjectListException = User.getInstance().getMyPersonalProjects(projects, this::updateFileList);
         loadingDialogFragment.show(getActivity().getFragmentManager(), null);
     }
 
     public void updateFileList(){
         loadingDialogFragment.dismiss();
         adapter.notifyDataSetChanged();
+        if(loadProjectListException[0]!=null) {
+            Toast.makeText(getContext(), loadProjectListException[0].getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
 
@@ -92,7 +96,7 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(getContext(), adapterView.getItemAtPosition(i).toString(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getContext(), adapterView.getItemAtPosition(i).toString(), Toast.LENGTH_SHORT).show();
                 Fragment mapFragment = new MapFragment();
                 Bundle bundle = new Bundle();
                 bundle.putBoolean("LoadMap", true);

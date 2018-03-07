@@ -120,22 +120,21 @@ public class ConnectedPoint {
     public void readFromJSON(JSONObject reader) throws JSONException
     {
         boolean failed = false;
-        int pointIndex = 0;
         savedLatitude = reader.getDouble("latitude");
         savedLongitude = reader.getDouble("longitude");
-        while(!failed){
+        for(int pointIndex=0;true;pointIndex++){
+            JSONObject tempChildJSON;
             try {
-                ConnectedPoint tempPoint = new ConnectedPoint(this);
-                JSONObject tempChildJSON = reader.getJSONObject("child"+pointIndex);
-                tempPoint.readFromJSON(tempChildJSON);
-                if(children ==null) {
-                    children = new ArrayList<ConnectedPoint>();
-                }
-                children.add(tempPoint);
-                pointIndex++;
+                tempChildJSON = reader.getJSONObject("child"+pointIndex);
             } catch(Exception e){
-                failed = true;
+                break;
             }
+            ConnectedPoint tempPoint = new ConnectedPoint(this);
+            tempPoint.readFromJSON(tempChildJSON);
+            if(children ==null) {
+                children = new ArrayList<ConnectedPoint>();
+            }
+            children.add(tempPoint);
         }
     }
 }

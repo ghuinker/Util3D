@@ -19,8 +19,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class User {
     private static final User instance = new User();
@@ -288,45 +290,72 @@ public class User {
         }
     }
 
-    public void getMyPersonalProjects(final ArrayList<Project> projects, final Runnable callback){
+    /**
+     *
+     * @return An array of length 1 containing the exception thrown by the database query.
+     * Note that the only reason I am returning an array is so that I can pass a reference to an
+     * exception that does not yet and may not ever actually exist
+     */
+    public Exception[] getMyPersonalProjects(final ArrayList<Project> projects, final Runnable callback){
         final DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference("/users/"+mAuth.getUid()+"/files");
+        Exception[] exception = {null};
         tempRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot temp:dataSnapshot.getChildren()) {
-                    //TODO: store filenames as values, not keys
-                    projects.add(new Project(temp.getKey()));
+                    //TODO: store filenames as values, not keys, check for null values
+                    String filename = temp.getKey();
+                    if(filename!=null&&!filename.equals("")) {
+                        Task<StorageMetadata> storageMetadataTask = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+filename).getMetadata();
+                        //It's ok to wait here. This happens in background thread.
+                        while(!storageMetadataTask.isComplete());
+                        if(storageMetadataTask.isSuccessful()) {
+                            StorageMetadata storageMetadata = storageMetadataTask.getResult();
+                            Date created = new Date(storageMetadata.getCreationTimeMillis());
+                            Date updated = new Date(storageMetadata.getUpdatedTimeMillis());
+                            //TODO: store utility type in database, retrieve here
+                            projects.add(new Project(filename, created, updated, null));
+                        }
+                        else{
+                            exception[0] = new Exception("A file in database file list does not exist in storage");
+                        }
+
+                    }
+                    else
+                    {
+                        exception[0] = new Exception("Blank or Null Filename Error");
+                    }
                 }
                 callback.run();
             }
 
-            //TODO: handle errors
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                
+                exception[0] = databaseError.toException();
+                callback.run();
             }
         });
+        return exception;
     }
 
     public Task getFileFromFirebaseStorage(String path, final Runnable callback) {
         //TODO: decide max file size, 10 mb currently
-        final Task<byte[]> download = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path).getBytes(10000000);
-        download.addOnCompleteListener(new OnCompleteListener<byte[]>() {
+        final Task<byte[]> downloadTask = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path).getBytes(10000000);
+        downloadTask.addOnCompleteListener(new OnCompleteListener<byte[]>() {
             @Override
             public void onComplete(@NonNull Task<byte[]> task) {
                 callback.run();
             }
         });
-        return download;
+        return downloadTask;
     }
 
     public Task writeFileToFirebaseStorage(String path, byte[] file, final Runnable callback){
-        //TODO: setup permissions
-        //TODO: hanlde other locations (shared files)
         DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path);
+        //TODO: handle failure
+        //TODO: store utility types in database
         tempRef.setValue(true);
         Task upload = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path).putBytes(file);
-        //TODO: dont't block UI thread, handle failure
         upload.addOnCompleteListener(new OnCompleteListener<byte[]>() {
             @Override
             public void onComplete(@NonNull Task task) {
