@@ -289,30 +289,27 @@ public class User {
     }
 
     public void getMyPersonalProjects(final ArrayList<Project> projects, final Runnable callback){
-        //TODO: setup permissions
-        //TODO: hanlde other locations (shared files)
         final DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference("/users/"+mAuth.getUid()+"/files");
         tempRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot temp:dataSnapshot.getChildren()) {
+                    //TODO: store filenames as values, not keys
                     projects.add(new Project(temp.getKey()));
                 }
-                //TODO: determine better way to do this
                 callback.run();
             }
 
+            //TODO: handle errors
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                
             }
         });
     }
 
     public Task getFileFromFirebaseStorage(String path, final Runnable callback) {
         //TODO: decide max file size, 10 mb currently
-        //TODO: setup permissions
-        //TODO: hanlde other locations (shared files)
         final Task<byte[]> download = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path).getBytes(10000000);
         download.addOnCompleteListener(new OnCompleteListener<byte[]>() {
             @Override
@@ -320,7 +317,6 @@ public class User {
                 callback.run();
             }
         });
-        //TODO: dont't block UI thread, handle failure
         return download;
     }
 

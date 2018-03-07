@@ -9,7 +9,7 @@ public class Line{
 
     public Line(String type){
         savedType = type;
-        nullHeadPoint = new ConnectedPoint();
+        nullHeadPoint = new ConnectedPoint(null);
     }
 
     public String getType(){
@@ -31,6 +31,6 @@ public class Line{
     {
         savedType = reader.getString("type");
         JSONObject initialPointJSON = reader.getJSONObject("initialPoint");
-        nullHeadPoint.readFromJSON(initialPointJSON, null);
+        nullHeadPoint.readFromJSON(initialPointJSON);
     }
 }

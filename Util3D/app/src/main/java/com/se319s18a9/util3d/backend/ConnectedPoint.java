@@ -12,15 +12,20 @@ public class ConnectedPoint {
     private double savedLongitude;
     private ConnectedPoint parentPoint;
     private ArrayList<ConnectedPoint> children;
+    private Line parentLine;
 
-    public ConnectedPoint(){
+    public ConnectedPoint(ConnectedPoint parent){
+        parentPoint = parent;
+        if(parent!=null) {
+            parentLine = parent.parentLine;
+        }
+        children = null;
     }
 
     public ConnectedPoint(ConnectedPoint parent, double latitude, double longitude){
+        this(parent);
         savedLatitude = latitude;
         savedLongitude = longitude;
-        children = null;
-        parentPoint = parent;
     }
 
     public LatLng getLatLng()
@@ -48,7 +53,7 @@ public class ConnectedPoint {
         return children.size()>1;
     }
 
-    public ConnectedPoint addReplacementParent(double latitude, double longitude)
+    public ConnectedPoint insertPointBetweenThisPointAndParent(double latitude, double longitude)
     {
         ConnectedPoint newPoint = new ConnectedPoint(this.parentPoint, latitude, longitude);
         parentPoint.children.add(newPoint);
@@ -92,6 +97,11 @@ public class ConnectedPoint {
         return parentPoint;
     }
 
+    public Line getParentLine()
+    {
+        return parentLine;
+    }
+
     public JSONObject writeToJSON() throws JSONException {
         JSONObject output = new JSONObject();
 
@@ -107,18 +117,17 @@ public class ConnectedPoint {
         return output;
     }
 
-    public void readFromJSON(JSONObject reader, ConnectedPoint parent) throws JSONException
+    public void readFromJSON(JSONObject reader) throws JSONException
     {
         boolean failed = false;
         int pointIndex = 0;
         savedLatitude = reader.getDouble("latitude");
         savedLongitude = reader.getDouble("longitude");
-        parentPoint = parent;
         while(!failed){
             try {
-                ConnectedPoint tempPoint = new ConnectedPoint();
+                ConnectedPoint tempPoint = new ConnectedPoint(this);
                 JSONObject tempChildJSON = reader.getJSONObject("child"+pointIndex);
-                tempPoint.readFromJSON(tempChildJSON, this);
+                tempPoint.readFromJSON(tempChildJSON);
                 if(children ==null) {
                     children = new ArrayList<ConnectedPoint>();
                 }

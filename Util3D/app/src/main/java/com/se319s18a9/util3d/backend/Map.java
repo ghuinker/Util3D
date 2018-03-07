@@ -72,19 +72,23 @@ public class Map {
 
     public void readFromJSON(String jsonString) throws JSONException
     {
+        ArrayList<Line> tempInitialLines = new ArrayList<>();
         JSONObject reader = new JSONObject(jsonString);
-        boolean failed = false;
-        int lineIndex = 0;
-        while(!failed){
+        for(int lineIndex = 0; true; lineIndex++){
+            JSONObject tempLineJSON;
             try {
-                Line tempLine = new Line(null);
-                JSONObject tempLineJSON = reader.getJSONObject("line"+lineIndex);
-                tempLine.readFromJSON(tempLineJSON);
-                initialLines.add(tempLine);
-                lineIndex++;
+                tempLineJSON = reader.getJSONObject("line"+lineIndex);
             } catch(Exception e){
-                failed = true;
+                break;
             }
+            Line tempLine = new Line(null);
+            //This line will throw an exception if the json is formatted incorrectly
+            tempLine.readFromJSON(tempLineJSON);
+            tempInitialLines.add(tempLine);
+        }
+        //I don't want to actually add any lines to this map until I am sure the entire json is formatted correctly
+        for (Line l:tempInitialLines) {
+            initialLines.add(l);
         }
     }
 }
