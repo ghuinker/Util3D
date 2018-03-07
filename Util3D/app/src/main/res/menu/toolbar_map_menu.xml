@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    tools:context="com.se319s18a9.util3d.Fragments.MapFragment">
+
+    <item
+        android:id="@+id/fragment_map_menu_togglemaptype"
+        android:title="@string/s_fragment_map_menu_togglemaptype"
+        app:showAsAction="never" />
+
+</menu>

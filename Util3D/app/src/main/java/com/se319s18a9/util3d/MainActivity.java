@@ -21,12 +21,11 @@ public class MainActivity extends AppCompatActivity {
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Dashboard");
 
-        selectStartingFragment();
+        selectFragment();
     }
 
-    public void selectStartingFragment() {
+    public void selectFragment() {
         Fragment startingFragment = new DashboardFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

@@ -11,28 +11,161 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent" />
 
+    <!-- My Location FAB -->
+
     <android.support.design.widget.FloatingActionButton
-        android:backgroundTint="@color/colorAccent"
         android:id="@+id/fragment_map_fab_myLocation"
-        android:layout_gravity="bottom|end"
+        android:layout_gravity="top|start"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:layout_width="wrap_content"
         android:src="@android:drawable/ic_menu_mylocation"
+        app:backgroundTint="@color/colorAccent"
         app:fabSize="normal"
         app:rippleColor="@color/colorPrimaryLight" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:backgroundTint="@color/colorAccent"
-        android:id="@+id/fragment_map_fab_tracking"
+    <!-- Utility: Water -->
+
+    <TextView
+        android:background="@color/colorAccent"
+        android:elevation="4dp"
+        android:id="@+id/fragment_map_textView_waterUtilityType"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="75dp"
+        android:layout_width="wrap_content"
+        android:padding="8dp"
+        android:text="Water"
+        android:textColor="@color/colorGenericWhite"
+        app:layout_anchor="@id/fragment_map_fab_utilityType_water"
+        app:layout_anchorGravity="left|center_vertical" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fragment_map_fab_utilityType_water"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="305dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginStart="0dp"
+        android:layout_width="wrap_content"
+        android:src="@android:drawable/ic_menu_add"
+        app:backgroundTint="@color/colorPrimaryDark"
+        app:fabSize="mini"
+        app:layout_anchor="@id/fragment_map_fab_utilityType_gas"
+        app:layout_anchorGravity="right"
+        app:rippleColor="@color/colorPrimaryLight" />
+
+    <!-- Utility: Gas -->
+
+    <TextView
+        android:background="@color/colorAccent"
+        android:elevation="4dp"
+        android:id="@+id/fragment_map_textView_gasUtilityType"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="75dp"
+        android:layout_width="wrap_content"
+        android:padding="8dp"
+        android:text="Gas"
+        android:textColor="@color/colorGenericWhite"
+        app:layout_anchor="@id/fragment_map_fab_utilityType_gas"
+        app:layout_anchorGravity="left|center_vertical" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fragment_map_fab_utilityType_gas"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="255dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginStart="0dp"
+        android:layout_width="wrap_content"
+        android:src="@android:drawable/ic_menu_add"
+        app:backgroundTint="@color/colorPrimaryDark"
+        app:fabSize="mini"
+        app:layout_anchor="@id/fragment_map_fab_utilityType_electric"
+        app:layout_anchorGravity="right"
+        app:rippleColor="@color/colorPrimaryLight" />
+
+    <!-- Utility: Electric -->
+
+    <TextView
+        android:background="@color/colorAccent"
+        android:elevation="4dp"
+        android:id="@+id/fragment_map_textView_electricUtilityType"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="75dp"
+        android:layout_width="wrap_content"
+        android:padding="8dp"
+        android:text="Electric"
+        android:textColor="@color/colorGenericWhite"
+        app:layout_anchor="@id/fragment_map_fab_utilityType_electric"
+        app:layout_anchorGravity="left|center_vertical" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fragment_map_fab_utilityType_electric"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="205dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginStart="0dp"
+        android:layout_width="wrap_content"
+        android:src="@android:drawable/ic_menu_add"
+        app:backgroundTint="@color/colorPrimaryDark"
+        app:fabSize="mini"
+        app:layout_anchor="@id/fragment_map_fab_utilityType_sewage"
+        app:layout_anchorGravity="right"
+        app:rippleColor="@color/colorPrimaryLight" />
+
+    <!-- Utility: Sewage -->
+
+    <TextView
+        android:background="@color/colorAccent"
+        android:elevation="4dp"
+        android:id="@+id/fragment_map_textView_sewageUtilityType"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="75dp"
+        android:layout_width="wrap_content"
+        android:padding="8dp"
+        android:text="Sewage"
+        android:textColor="@color/colorGenericWhite"
+        app:layout_anchor="@id/fragment_map_fab_utilityType_sewage"
+        app:layout_anchorGravity="left|center_vertical" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fragment_map_fab_utilityType_sewage"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="155dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginStart="0dp"
+        android:layout_width="wrap_content"
+        android:src="@android:drawable/ic_menu_add"
+        app:backgroundTint="@color/colorPrimaryDark"
+        app:fabSize="mini"
+        app:layout_anchor="@id/fragment_map_fab_utilityType"
+        app:layout_anchorGravity="right"
+        app:rippleColor="@color/colorPrimaryLight" />
+
+    <!-- Utility Type FAB -->
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fragment_map_fab_utilityType"
         android:layout_gravity="top|end"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="85dp"
         android:layout_width="wrap_content"
-        android:src="@android:drawable/ic_media_play"
+        android:src="@android:drawable/ic_menu_manage"
+        app:backgroundTint="@color/colorAccent"
         app:fabSize="normal"
-        app:layout_anchor="@id/fragment_map_fab_myLocation"
+        app:layout_anchor="@id/fragment_map_fab_tracking"
         app:layout_anchorGravity="top"
+        app:rippleColor="@color/colorPrimaryLight" />
+
+    <!-- Tracking FAB -->
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fragment_map_fab_tracking"
+        android:layout_gravity="bottom|end"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:layout_width="wrap_content"
+        android:src="@android:drawable/ic_media_play"
+        app:backgroundTint="@color/colorAccent"
+        app:fabSize="normal"
         app:rippleColor="@color/colorPrimaryLight" />
 
 </android.support.design.widget.CoordinatorLayout>

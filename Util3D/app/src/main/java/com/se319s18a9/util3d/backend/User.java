@@ -27,7 +27,7 @@ public class User {
     private FirebaseAuth mAuth;
     private FirebaseDatabase mDatabase;
 
-    private User() {
+    public User() {
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance();
     }
@@ -176,6 +176,10 @@ public class User {
         }
     }
 
+    public String getUserID(){
+       return mAuth.getCurrentUser().getUid();
+    }
+
     /**
      * Change username. Returns a boolean since the firebase method does not throw any exceptions.
      * @param displayName
@@ -284,7 +288,7 @@ public class User {
         }
     }
 
-    public void getMyPersonalFilenames(final ArrayList<String> filenames, final Runnable callback){
+    public void getMyPersonalProjects(final ArrayList<Project> projects, final Runnable callback){
         //TODO: setup permissions
         //TODO: hanlde other locations (shared files)
         final DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference("/users/"+mAuth.getUid()+"/files");
@@ -292,7 +296,7 @@ public class User {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot temp:dataSnapshot.getChildren()) {
-                    filenames.add(temp.getKey());
+                    projects.add(new Project(temp.getKey()));
                 }
                 //TODO: determine better way to do this
                 callback.run();

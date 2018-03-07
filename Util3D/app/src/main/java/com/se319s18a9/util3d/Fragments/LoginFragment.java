@@ -1,5 +1,6 @@
 package com.se319s18a9.util3d.Fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -19,14 +20,13 @@ import com.se319s18a9.util3d.backend.User;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
-    OnSuccessfulLoginListener mCallback;
+    OnSuccessfulLoginListener mOnSuccessfulLoginListener;
 
     private EditText usernameEditText;
-
     private EditText passwordEditText;
+
     Button loginButton;
     Button forgotPasswordButton;
-
     Button createAccountButton;
 
     public interface OnSuccessfulLoginListener {
@@ -42,7 +42,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         super.onAttach(context);
 
         try {
-            mCallback = (OnSuccessfulLoginListener) context;
+            mOnSuccessfulLoginListener = (OnSuccessfulLoginListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnSuccessfulLoginListener");
         }
@@ -56,7 +56,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
         View v = inflater.inflate(R.layout.fragment_login, container, false);
 
-        // Initialize EditTexts, and Buttons
+        // Set toolbar title
+
+        getActivity().setTitle(R.string.global_fragmentName_login);
+
+        // Initialize components and bind listeners
 
         usernameEditText = v.findViewById(R.id.fragment_login_editText_username);
         passwordEditText = v.findViewById(R.id.fragment_login_editText_password);
@@ -76,9 +80,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onResume(){
         super.onResume();
-        if(User.getInstance().isAlreadyLoggedIn())
-        {
-            mCallback.onSuccessfulLogin();
+
+        if(User.getInstance().isAlreadyLoggedIn()) {
+            mOnSuccessfulLoginListener.onSuccessfulLogin();
         }
     }
 
@@ -86,19 +90,16 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fragment_login_button_login:
-                String username = this.getEditTextValue(usernameEditText);
-                String password = this.getEditTextValue(passwordEditText);
-
-                if (User.getInstance().validateAndLogin(username, password)) {
-                    mCallback.onSuccessfulLogin();
+                if (User.getInstance().validateAndLogin(this.getEditTextValue(usernameEditText), this.getEditTextValue(passwordEditText))) {
+                    mOnSuccessfulLoginListener.onSuccessfulLogin();
                 } else {
                     Toast.makeText(this.getContext(), R.string.s_fragment_login_errorMessage_invalidCredentials, Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.fragment_login_button_forgotPassword:
-                // TODO
-
                 LayoutInflater layoutInflater = LayoutInflater.from(this.getContext());
+
+                @SuppressLint("InflateParams")
                 final View dialogView = layoutInflater.inflate(R.layout.dialog_forgotpassword, null);
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.getContext());
                 alertDialogBuilder.setTitle(getString(R.string.s_dialog_forgotPassword_title));
@@ -106,21 +107,24 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 alertDialogBuilder
                         .setPositiveButton(R.string.s_dialog_forgotPassword_button_sendEmail,
                                 new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {}})
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        // Leave empty :(
+                                    }})
                         .setNegativeButton(R.string.s_dialog_forgotPassword_button_cancel,
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
                                     }
                                 });
+
                 final AlertDialog alertDialog = alertDialogBuilder.create();
                 alertDialog.show();
-                alertDialog.getButton(alertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
+                alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View v) {
                         try {
                             User.getInstance().sendPasswordResetEmail(((EditText) dialogView.findViewById(R.id.dialog_forgotPassword_editText_email)).getText().toString());
-                            Toast.makeText(v.getContext(), R.string.s_dialog_forgotPassword_successMessage, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(v.getContext(), R.string.s_dialog_forgotPassword_toast_successMessage, Toast.LENGTH_SHORT).show();
                             alertDialog.dismiss();
                         } catch (Exception e) {
                             Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -134,8 +138,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.activity_login_frameLayout_root, createAccountFragment);
                 fragmentTransaction.addToBackStack(null).commit();
+                break;
         }
     }
+
+    // Helper methods
 
     private String getEditTextValue(EditText editText) {
         return editText.getText().toString();

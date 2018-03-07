@@ -6,12 +6,17 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import com.amulyakhare.textdrawable.TextDrawable;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -26,10 +31,14 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -52,11 +61,32 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     Task<byte []> download;
     Task upload;
     LoadingDialogFragment loadingDialogFragment;
+    String filename;
 
-    FloatingActionButton trackingFab;
     FloatingActionButton myLocationFab;
 
+    TextView waterUtilityTextView;
+    FloatingActionButton waterUtilityTypeFab;
+    TextView gasUtilityTextView;
+    FloatingActionButton gasUtilityTypeFab;
+    TextView electricUtilityTextView;
+    FloatingActionButton electricUtilityTypeFab;
+    TextView sewageUtilityTextView;
+    FloatingActionButton sewageUtilityTypeFab;
+
+    FloatingActionButton utilityTypeFab;
+    FloatingActionButton trackingFab;
+
+    public enum UtilityType {
+        WATER, GAS, ELECTRIC, SEWAGE
+    }
+
+    public UtilityType selectedUtility = UtilityType.WATER;
+
     boolean trackingEnabled = false;
+    boolean utilitiesVisible = false;
+
+    ArrayList<MarkerOptions> markers = new ArrayList<>();
 
     public MapFragment() {
         // Empty constructor
@@ -65,6 +95,7 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         graph = new Map();
         //graph.setSavedPoint(graph.addNewLine("Electric").getNullHeadPoint());
                         /*
@@ -85,10 +116,23 @@ public class MapFragment extends Fragment implements View.OnClickListener {
 
         //renderFromScratch();
         //User.getInstance().writeFileToFirebaseStorage("test7531");
-        boolean loadFromFile = true;
-        String givenFilename = "testJSON1";
+
+        boolean loadFromFile;
+        filename = null;
+        if(getArguments()!=null){
+            loadFromFile=getArguments().getBoolean("LoadMap");
+            filename = getArguments().getString("ProjectName");
+        }
+        else{
+            loadFromFile = false;
+        }
+        if(filename==null)
+        {
+            //TODO: generate non-conflicting name
+            filename = "newfile";
+        }
         if(loadFromFile) {
-            download = User.getInstance().getFileFromFirebaseStorage(givenFilename, this::loadDownloadedMap);
+            download = User.getInstance().getFileFromFirebaseStorage(filename, this::loadDownloadedMap);
             loadingDialogFragment = new LoadingDialogFragment();
             loadingDialogFragment.setCancelable(false);
             Bundle messageArgument = new Bundle();
@@ -96,22 +140,66 @@ public class MapFragment extends Fragment implements View.OnClickListener {
             loadingDialogFragment.setArguments(messageArgument);
             loadingDialogFragment.show(getActivity().getFragmentManager(), null);
         }
+        else{
+            //setup blank map
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //TODO:Check if opening file or creating file and handle differently
+        if (container != null) {
+            container.removeAllViews();
+        }
+
         View v = inflater.inflate(R.layout.fragment_map, container, false);
 
-        trackingFab = v.findViewById(R.id.fragment_map_fab_tracking);
-        trackingFab.setOnClickListener(this);
-        myLocationFab = v.findViewById(R.id.fragment_map_fab_myLocation);
-        myLocationFab.setOnClickListener(this);
+        // Set toolbar title
+        final Bundle bundle = getArguments();
+        getActivity().setTitle(bundle.getString("ProjectName"));
+
+        // Initialize local variables
 
         mMapView = v.findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
 
         mMapView.onResume(); // needed to get the map to display immediately
+
+        myLocationFab = v.findViewById(R.id.fragment_map_fab_myLocation);
+        myLocationFab.setOnClickListener(this);
+
+        waterUtilityTextView = v.findViewById(R.id.fragment_map_textView_waterUtilityType);
+        waterUtilityTextView.setVisibility(View.INVISIBLE);
+
+        waterUtilityTypeFab = v.findViewById(R.id.fragment_map_fab_utilityType_water);
+        waterUtilityTypeFab.setOnClickListener(this);
+        waterUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+        gasUtilityTextView = v.findViewById(R.id.fragment_map_textView_gasUtilityType);
+        gasUtilityTextView.setVisibility(View.INVISIBLE);
+
+        gasUtilityTypeFab= v.findViewById(R.id.fragment_map_fab_utilityType_gas);
+        gasUtilityTypeFab.setOnClickListener(this);
+        gasUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+        electricUtilityTextView = v.findViewById(R.id.fragment_map_textView_electricUtilityType);
+        electricUtilityTextView.setVisibility(View.INVISIBLE);
+
+        electricUtilityTypeFab = v.findViewById(R.id.fragment_map_fab_utilityType_electric);
+        electricUtilityTypeFab.setOnClickListener(this);
+        electricUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+        sewageUtilityTextView = v.findViewById(R.id.fragment_map_textView_sewageUtilityType);
+        sewageUtilityTextView.setVisibility(View.INVISIBLE);
+
+        sewageUtilityTypeFab = v.findViewById(R.id.fragment_map_fab_utilityType_sewage);
+        sewageUtilityTypeFab.setOnClickListener(this);
+        sewageUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+        utilityTypeFab = v.findViewById(R.id.fragment_map_fab_utilityType);
+        utilityTypeFab.setOnClickListener(this);
+
+        trackingFab = v.findViewById(R.id.fragment_map_fab_tracking);
+        trackingFab.setOnClickListener(this);
 
         try {
             MapsInitializer.initialize(getActivity().getApplicationContext());
@@ -158,20 +246,121 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.toolbar_map_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.fragment_map_menu_togglemaptype:
+                if(googleMap.getMapType() == GoogleMap.MAP_TYPE_NORMAL) {
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                    Toast.makeText(getContext(), "Map Type: Satellite", Toast.LENGTH_SHORT).show();
+                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_SATELLITE) {
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                    Toast.makeText(getContext(), "Map Type: Terrain", Toast.LENGTH_SHORT).show();
+                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_TERRAIN) {
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                    Toast.makeText(getContext(), "Map Type: Hybrid", Toast.LENGTH_SHORT).show();
+                } else if(googleMap.getMapType() == GoogleMap.MAP_TYPE_HYBRID) {
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    Toast.makeText(getContext(), "Map Type: Normal", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            default:
+                Toast.makeText(getActivity(), "Something happened", Toast.LENGTH_SHORT).show();
+                return false;
+
+        }
+    }
+
+    @Override
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.fragment_map_fab_myLocation:
-                Toast.makeText(getContext(), "My Location", Toast.LENGTH_SHORT).show();
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+                for (MarkerOptions marker : markers) {
+                    builder.include(marker.getPosition());
+                }
+
+                LatLngBounds bounds = builder.build();
+
+                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 50); // padding = 50 px
+                googleMap.animateCamera(cu);
+                break;
+            case R.id.fragment_map_fab_utilityType_water:
+                Toast.makeText(getContext(), "Water", Toast.LENGTH_SHORT).show();
+                selectedUtility = UtilityType.WATER;
+                break;
+            case R.id.fragment_map_fab_utilityType_gas:
+                Toast.makeText(getContext(), "Gas", Toast.LENGTH_SHORT).show();
+                selectedUtility = UtilityType.GAS;
+                break;
+            case R.id.fragment_map_fab_utilityType_electric:
+                Toast.makeText(getContext(), "Electric", Toast.LENGTH_SHORT).show();
+                selectedUtility = UtilityType.ELECTRIC;
+                break;
+            case R.id.fragment_map_fab_utilityType_sewage:
+                Toast.makeText(getContext(), "Sewage", Toast.LENGTH_SHORT).show();
+                selectedUtility = UtilityType.SEWAGE;
+                break;
+            case R.id.fragment_map_fab_utilityType:
+                if(!trackingEnabled && !utilitiesVisible) {
+                    enableUtilities(true);
+                } else if(utilitiesVisible) {
+                    enableUtilities(false);
+                }
                 break;
             case R.id.fragment_map_fab_tracking:
                 if(!trackingEnabled) {
                     trackingEnabled = true;
+                    utilityTypeFab.setEnabled(false);
+                    enableUtilities(false);
                     Toast.makeText(getContext(), "Tracking enabled", Toast.LENGTH_SHORT).show();
+
+                    TextDrawable drawable = null;
+
+                    switch (selectedUtility) {
+                        case WATER:
+                            drawable = TextDrawable.builder()
+                                    .beginConfig()
+                                    .width(120)  // width in px
+                                    .height(120) // height in px
+                                    .endConfig().buildRound("W", R.color.colorGenericBlue);
+                            break;
+                        case GAS:
+                            drawable = TextDrawable.builder()
+                                    .beginConfig()
+                                    .width(120)  // width in px
+                                    .height(120) // height in px
+                                    .endConfig().buildRound("G", R.color.colorGenericOrange);
+                            break;
+                        case ELECTRIC:
+                            drawable = TextDrawable.builder()
+                                    .beginConfig()
+                                    .width(120)  // width in px
+                                    .height(120) // height in px
+                                    .endConfig().buildRound("E", R.color.colorGenericYellow);
+                            break;
+                        case SEWAGE:
+                            drawable = TextDrawable.builder()
+                                    .beginConfig()
+                                    .width(120)  // width in px
+                                    .height(120) // height in px
+                                    .endConfig().buildRound("S", R.color.colorGenericGreen);
+                            break;
+                    }
+
+                    trackingFab.setImageDrawable(drawable);
                 } else {
                     trackingEnabled = false;
+                    utilityTypeFab.setEnabled(true);
+                    trackingFab.setImageResource(android.R.drawable.ic_media_play);
                     Toast.makeText(getContext(), "Tracking disabled", Toast.LENGTH_SHORT).show();
                 }
-
                 break;
         }
     }
@@ -288,12 +477,13 @@ public class MapFragment extends Fragment implements View.OnClickListener {
         loadingDialogFragment = null;
         temp.dismiss();
         if(saveAndExit){
-            getActivity().getSupportFragmentManager().popBackStackImmediate();
+            getActivity().getSupportFragmentManager().popBackStackImmediate("dashboardIdentifier", FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
     }
 
-    private void dialogSaveHelper(AlertDialog dialog, String filename, boolean exitAfterSave)
+    private void dialogSaveHelper(AlertDialog dialog, String newFilename, boolean exitAfterSave)
     {
+        filename = newFilename;
         dialog.dismiss();
         try{
             loadingDialogFragment = new LoadingDialogFragment();
@@ -319,7 +509,7 @@ public class MapFragment extends Fragment implements View.OnClickListener {
         final View dialogView = layoutInflater.inflate(R.layout.dialog_savemap, null);
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.getContext());
         //TODO: fill with current filename
-        ((EditText) dialogView.findViewById(R.id.dialog_saveMap_editText_filename)).setText("testJSON1");
+        ((EditText) dialogView.findViewById(R.id.dialog_saveMap_editText_filename)).setText(filename);
         if(exitAfterSave){
             alertDialogBuilder.setTitle("Save and Exit");
             ((TextView) dialogView.findViewById(R.id.dialog_saveMap_textView_prompt)).setText("Would you like to save before exiting?");
@@ -340,7 +530,7 @@ public class MapFragment extends Fragment implements View.OnClickListener {
                 .setNegativeButton("No",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                getActivity().getSupportFragmentManager().popBackStackImmediate();
+                                getActivity().getSupportFragmentManager().popBackStackImmediate("dashboardIdentifier", FragmentManager.POP_BACK_STACK_INCLUSIVE);
                             }
                         });
         final AlertDialog alertDialog = alertDialogBuilder.create();
@@ -354,6 +544,25 @@ public class MapFragment extends Fragment implements View.OnClickListener {
                 if(trackingEnabled) {
                     ConnectedPoint currentPoint = graph.getSavedPoint().addAChild(point.latitude, point.longitude);
                     MarkerOptions markerOptions = new MarkerOptions().position(currentPoint.getLatLng());
+
+                    //TODO: set polyline color and make markers look better
+                    switch(selectedUtility) {
+                        case WATER:
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                            break;
+                        case GAS:
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+                            break;
+                        case ELECTRIC:
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+                            break;
+                        case SEWAGE:
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                            break;
+                    }
+                    //TODO: Determine why this was added and then delete. Seems unnecessary.
+                    markers.add(markerOptions);
+
                     Marker marker = googleMap.addMarker(markerOptions);
                     Polyline polyline = null;
                     if(!currentPoint.getParentPoint().isRoot())
@@ -385,5 +594,57 @@ public class MapFragment extends Fragment implements View.OnClickListener {
         });
 
     //TODO: Add marker drag listener
+    }
+
+    // Helper methods
+
+    private void enableUtilities(boolean enable) {
+        if(enable) {
+            // set visible
+
+            waterUtilityTypeFab.setVisibility(FloatingActionButton.VISIBLE);
+            waterUtilityTextView.setVisibility(View.VISIBLE);
+
+            gasUtilityTypeFab.setVisibility(FloatingActionButton.VISIBLE);
+            gasUtilityTextView.setVisibility(View.VISIBLE);
+
+            electricUtilityTypeFab.setVisibility(FloatingActionButton.VISIBLE);
+            electricUtilityTextView.setVisibility(View.VISIBLE);
+
+            sewageUtilityTypeFab.setVisibility(FloatingActionButton.VISIBLE);
+            sewageUtilityTextView.setVisibility(View.VISIBLE);
+
+            // set listeners
+
+            waterUtilityTypeFab.setOnClickListener(this);
+            gasUtilityTypeFab.setOnClickListener(this);
+            electricUtilityTypeFab.setOnClickListener(this);
+            sewageUtilityTypeFab.setOnClickListener(this);
+
+            utilitiesVisible = true;
+        } else {
+            // set invisible
+
+            waterUtilityTextView.setVisibility(View.INVISIBLE);
+            waterUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+            gasUtilityTextView.setVisibility(View.INVISIBLE);
+            gasUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+            electricUtilityTextView.setVisibility(View.INVISIBLE);
+            electricUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+            sewageUtilityTextView.setVisibility(View.INVISIBLE);
+            sewageUtilityTypeFab.setVisibility(FloatingActionButton.INVISIBLE);
+
+            // disconnect listeners
+
+            waterUtilityTypeFab.setOnClickListener(null);
+            gasUtilityTypeFab.setOnClickListener(null);
+            electricUtilityTypeFab.setOnClickListener(null);
+            sewageUtilityTypeFab.setOnClickListener(null);
+
+            utilitiesVisible = false;
+        }
     }
 }

@@ -1,42 +1,71 @@
 package com.se319s18a9.util3d.Fragments;
 
-
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
-
-
-
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.se319s18a9.util3d.R;
+import com.se319s18a9.util3d.backend.User;
+import com.se319s18a9.util3d.database.StoreJSON;
 
-
+import java.util.ArrayList;
 
 public class CreateProjectFragment extends Fragment implements View.OnClickListener {
 
-    private Button createProjectButton;
-    private Spinner utilitiesSpinner;
     private EditText projectNameEditText;
-    private EditText orginizationEditText;
+    private EditText organizationEditText;
     private EditText locationEditText;
+    private Button createProjectButton;
+    private Button cancelButton;
+    private Spinner utilitiesSpinner;
 
-    private String utility;
-
-    private String orginization;
+    private ArrayList<String> utilitiesUsed;
+    private ArrayList<Utility> utilities;
+    private String organization;
     private String projectName;
     private String location;
 
+    private String JSONString = "test"; //Need JSON String from Mason
+
+    private DatabaseReference databaseReference;
+    private FirebaseAuth mAuth;
+
     public CreateProjectFragment() {
         // Empty constructor
+    }
+
+    public void saveJSON() {
+
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        String projectname = projectNameEditText.getText().toString().trim();
+        String orginizationname = organizationEditText.getText().toString().trim();
+        String locationname = locationEditText.getText().toString().trim();
+        String json = JSONString.trim();
+
+        StoreJSON storeJSON = new StoreJSON(projectname, orginizationname, locationname, json);
+        
+        databaseReference.child(User.getInstance().getUserID()).child("Projects").child(getProjectName()).setValue(storeJSON);
+
+        //Toast.makeText(this, "Information Updated",Toast.LENGTH_LONG).show();
+
     }
 
     @Override
@@ -46,28 +75,61 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if (container != null) {
+            container.removeAllViews();
+        }
+
         View v = inflater.inflate(R.layout.fragment_createproject, container, false);
+
+        // Set toolbar title
+
+        getActivity().setTitle(R.string.global_fragmentName_createProject);
+
+        // Initialize local variables
+
+        String[] utilityNames = getResources().getStringArray(R.array.s_fragment_createProject_spinner_utilities);
+
+        // Initialize components and bind listeners
+
+        projectNameEditText = v.findViewById(R.id.fragment_createProject_editText_projectName);
+        locationEditText = v.findViewById(R.id.fragment_createProject_editText_location);
+
+        utilitiesSpinner = v.findViewById(R.id.fragment_createProject_spinner_utilites);
+
+        organizationEditText = v.findViewById(R.id.fragment_createProject_editText_organization);
 
         createProjectButton = v.findViewById(R.id.fragment_createProject_button_create);
         createProjectButton.setOnClickListener(this);
 
+        cancelButton = v.findViewById(R.id.fragment_createProject_button_cancel);
+        cancelButton.setOnClickListener(this);
 
-        utilitiesSpinner = v.findViewById(R.id.fragment_createProject_spinner_utilites);
-        utilitiesSpinner.setOnItemSelectedListener(new CustomSpinnerListener());
+        // Initialize and populate utility spinner with string array from string resource package
 
-        projectNameEditText = v.findViewById(R.id.fragment_createProject_editText_projectName);
-        orginizationEditText = v.findViewById(R.id.fragment_createProject_editText_organization);
-        locationEditText = v.findViewById(R.id.fragment_createProject_editText_location);
-        utility = utilitiesSpinner.getItemAtPosition(0).toString();
+        utilities = new ArrayList<>();
+        for (String utilityName : utilityNames) {
+            utilities.add(new Utility(utilityName, true));
+        }
 
+        updateUtilitiesChecked();
+
+        // Create an array from utilities ArrayList to be passed into MultiSpinner adapter
+
+        Utility[] utilArr = new Utility[utilities.size()];
+        utilArr = utilities.toArray(utilArr);
+
+        // Create and initialize MultiSpinner adapter and set spinner to this adapter
+
+        MultiSpinnerAdapter adapter = new MultiSpinnerAdapter(this.getContext(), R.layout.fragment_spinneritem, R.id.fragment_spinnerItem_textView, utilArr);
+        utilitiesSpinner.setAdapter(adapter);
+        utilitiesUsed = new ArrayList<>();
 
         return v;
     }
 
-
     /**
      * Method called whenever the screen is clicked.
-     * @param v
+     * @param v TBD
      */
     @Override
     public void onClick(View v) {
@@ -78,55 +140,146 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
         switch(v.getId()) {
             case R.id.fragment_createProject_button_create:
 
-                this.orginization = getEditTextValue(orginizationEditText);
-                this.location = getEditTextValue(locationEditText);
+                //Sets Values for global fragment to the edit text value
                 this.projectName = getEditTextValue(projectNameEditText);
+                this.location = getEditTextValue(locationEditText);
+                this.organization = getEditTextValue(organizationEditText);
 
                 Fragment mapFragment = new MapFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("ProjectName", projectName);
+                bundle.putString("Location", location);
+                bundle.putString("Organization", organization);
+                bundle.putBoolean("LoadMap", false);
+                bundle.putStringArrayList("UtilitiesUsed", utilitiesUsed);
+                mapFragment.setArguments(bundle);
                 fragmentManager = getActivity().getSupportFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.activity_main_frameLayout_root, mapFragment);
                 fragmentTransaction.addToBackStack(null).commit();
+                //TODO: Why is this here?
+                saveJSON();
+
+
             break;
 
-            case R.id.fragment_createProject_spinner_utilites:
-
-
-
+            // TODO: Make this an actual cancel method that returns to previous screen
+            case R.id.fragment_createProject_button_cancel:
+                getFragmentManager().popBackStack();
+                break;
         }
     }
 
     /**
-     * This sets the utility string from the given string.
-     * @param util
+     * Creates Adapter For Multi Spinner
      */
-    //TODO check if it is a correct utility
-    public void setUtility(String util){
-        this.utility = util;
+    public class MultiSpinnerAdapter extends ArrayAdapter<Utility> {
+        private Context context;
+        private Utility[] utilities;
+        private LayoutInflater flater;
+
+        MultiSpinnerAdapter(@NonNull Context context, int layoutID, int textViewID, Utility[] data ) {
+            super(context, layoutID, textViewID, data);
+            this.context = context;
+            this.utilities = data;
+            flater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        }
+
+        //Sets Spinner View When the Drop Down is up
+        @Override
+        public View getView(int pos, View convertView, ViewGroup parent){
+            if(convertView == null){
+                convertView = flater.inflate(R.layout.fragment_spinneritem, parent, false);
+            }
+
+            View utilityView = flater.inflate(R.layout.fragment_spinneritem_closed, null, true);
+            TextView textView = (TextView) utilityView.findViewById(R.id.fragment_spinnerItem_closed_textView);
+            textView.setText("Select Utilities");
+
+            return utilityView;
+        }
+
+        // Sets Each view of spinner when drop down is down
+        @Override
+        public View getDropDownView(int pos, View convertView, ViewGroup parent) {
+            if(convertView == null) {
+                convertView = flater.inflate(R.layout.fragment_spinneritem, parent, false);
+            }
+
+            Utility utility = this.utilities[pos];
+
+            String utilityName = this.utilities[pos].toString();
+            TextView title = (TextView) convertView.findViewById(R.id.fragment_spinnerItem_textView);
+
+            CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.fragment_spinnerItem_checkbox);
+
+            checkBox.setChecked(utilities[pos].isChecked);
+            checkBox.setOnCheckedChangeListener(new CustomOnCheckedChangeListener(utility, context));
+
+            title.setText(utilityName);
+            return convertView;
+        }
+    }
+
+    /**
+     * Class of custom onChecked Listener
+     */
+    private class CustomOnCheckedChangeListener implements CompoundButton.OnCheckedChangeListener {
+        Context context;
+        Utility utility;
+
+        CustomOnCheckedChangeListener(Utility utility, Context context){
+            this.utility = utility;
+            this.context = context;
+        }
+
+        /**
+         * Called whenever a checkbox is clicked on. The new state is passed as boolean b
+         * @param compoundButton TBD
+         * @param b TBD
+         */
+        @Override
+        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+            utility.setIsChecked(b);
+            updateUtilitiesChecked();
+        }
     }
 
 
     /**
-     * Public class used for the spinner
-     * TODO Update this to multi selector
+     * Class of utility items for MultiSpinner Adapter
      */
-    public class CustomSpinnerListener implements AdapterView.OnItemSelectedListener {
+    private class Utility{
+        boolean isChecked;
+        String utilityType;
 
-        public void onItemSelected(AdapterView<?> parent, View view, int pos,long id) {
-            setUtility(parent.getItemAtPosition(pos).toString());
-        }
-        public void onNothingSelected(AdapterView<?> arg0) {
-            // TODO Auto-generated method stub
+        Utility(String utilityType, boolean isChecked){
+            this.isChecked = isChecked;
+            this.utilityType = utilityType;
         }
 
+        void setIsChecked(boolean checked){
+            isChecked = checked;
+        }
+
+        @Override
+        public String toString(){
+            return utilityType;
+        }
     }
 
     /**
-     * This method gets the string value from the edittext given
-     *
-     * @param editText
-     * @return String from editext
+     * This method update the string list that will allow us to see the utilities picked
      */
+    private void updateUtilitiesChecked(){
+        utilitiesUsed = new ArrayList<>();
+        for(int i=0; i<utilities.size(); i++){
+            if(utilities.get(i).isChecked){
+                utilitiesUsed.add(utilities.get(i).toString());
+            }
+        }
+    }
+
     private String getEditTextValue(EditText editText) {
         return editText.getText().toString();
     }
@@ -134,15 +287,15 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
     /**
      * @return utility String
      */
-    public String getUtility(){
-        return utility;
+    public ArrayList<String> getUtility(){
+        return utilitiesUsed;
     }
 
     /**
      * @return orginization String
      */
     public String getOrginization(){
-        return orginization;
+        return organization;
     }
 
     /**
@@ -156,8 +309,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
      * @return Orginization
      */
     public String getLocation(){
-        return orginization;
+        return location;
     }
-
 
 }
