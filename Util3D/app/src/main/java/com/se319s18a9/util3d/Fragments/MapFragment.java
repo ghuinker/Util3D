@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.Task;
 import com.se319s18a9.util3d.R;
 import com.se319s18a9.util3d.backend.ConnectedPoint;
+import com.se319s18a9.util3d.backend.CustomAsyncTask;
 import com.se319s18a9.util3d.backend.Line;
 import com.se319s18a9.util3d.backend.Map;
 import com.se319s18a9.util3d.backend.User;
@@ -60,6 +61,7 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     Map graph;
     Task<byte []> download;
     Task upload;
+    CustomAsyncTask customUpload;
     LoadingDialogFragment loadingDialogFragment;
     String filename;
 
@@ -445,13 +447,13 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     }
 
     private void saveOrExit(boolean saveAndExit) {
-        if(!upload.isSuccessful()){
-            Toast.makeText(getContext(), "Upload Failed", Toast.LENGTH_LONG).show();
-        }
         LoadingDialogFragment temp = loadingDialogFragment;
         loadingDialogFragment = null;
         temp.dismiss();
-        if(saveAndExit){
+        if(!customUpload.isSuccessful()){
+            Toast.makeText(getContext(), "Upload Failed", Toast.LENGTH_LONG).show();
+        }
+        else if(saveAndExit){
             getActivity().getSupportFragmentManager().popBackStackImmediate("dashboardIdentifier", FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
     }
@@ -466,7 +468,8 @@ public class MapFragment extends Fragment implements View.OnClickListener {
             Bundle messageArgument = new Bundle();
             if(exitAfterSave) {
                 messageArgument.putString("message", "Saving and exiting");
-                upload = User.getInstance().writeFileToFirebaseStorage(filename, graph.writeToJSON().getBytes(),this::saveAndExitCallback);
+                //upload = User.getInstance().writeFileToFirebaseStorage(filename, graph.writeToJSON().getBytes(),this::saveAndExitCallback);
+                customUpload = User.getInstance().writeMapToFirebaseStorage(filename, graph, this::saveAndExitCallback, getActivity());
             }else{
                 messageArgument.putString("message", "Saving map");
                 upload = User.getInstance().writeFileToFirebaseStorage(filename, graph.writeToJSON().getBytes(),this::saveCallback);

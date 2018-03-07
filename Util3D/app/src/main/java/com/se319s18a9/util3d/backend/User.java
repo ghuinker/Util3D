@@ -1,5 +1,7 @@
 package com.se319s18a9.util3d.backend;
 
+import android.app.Activity;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -20,6 +22,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -350,18 +355,83 @@ public class User {
         return downloadTask;
     }
 
-    public Task writeFileToFirebaseStorage(String path, byte[] file, final Runnable callback){
-        DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path);
-        //TODO: handle failure
-        //TODO: store utility types in database
-        tempRef.setValue(true);
-        Task upload = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path).putBytes(file);
-        upload.addOnCompleteListener(new OnCompleteListener<byte[]>() {
-            @Override
-            public void onComplete(@NonNull Task task) {
-                callback.run();
+    public CustomAsyncTask writeMapToFirebaseStorage(String givenPath, Map givenMap, final Runnable givenCallback, Activity givenActivity){
+        //TODO:Allow upload operation to be cancelled. If operation stalls (for example, due to no internet), application will hang until firebase calls succeed
+        class MapToJSONTask extends CustomAsyncTask{
+            boolean complete = false;
+            boolean successful = false;
+            Exception exception = null;
+            String path;
+            Map map;
+            Runnable callback;
+            Activity activity;
+
+            public MapToJSONTask(String givenPath, Map givenMap, final Runnable givenCallback, Activity givenActivity){
+                path = givenPath;
+                map = givenMap;
+                callback = givenCallback;
+                boolean complete;
+                boolean successful;
+                Exception exception;
+                activity = givenActivity;
             }
-        });
-        return upload;
+
+            public boolean isComplete(){
+                return complete;
+            }
+
+            public boolean isSuccessful(){
+                return successful;
+            }
+
+            public Exception getException(){
+                return exception;
+            }
+
+            public void run() {
+                byte[] json;
+                try{
+                    json = map.writeToJSON().getBytes();
+                    DatabaseReference tempRef = FirebaseDatabase.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path);
+                    final boolean[] databaseWriteCompleted = {false};
+                    DatabaseReference.CompletionListener completionListener = new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                            if(databaseError!=null) {
+                                exception = databaseError.toException();
+                            }
+                            databaseWriteCompleted[0] = true;
+                        }
+                    };
+                    tempRef.setValue(true, completionListener);
+                    int debug = 0;
+                    while(!databaseWriteCompleted[0]){
+                        Thread.sleep(100);
+                    }
+                    if(exception!=null)
+                    {
+                        throw exception;
+                    }
+                    Task upload = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path).putBytes(json);
+                    while(!upload.isComplete()){
+                        Thread.sleep(100);
+                    }
+                    exception = upload.getException();
+                    if(exception!=null) {
+                        throw exception;
+                    }
+                    successful = true;
+                }catch(Exception e){
+                    exception = e;
+                    successful = false;
+                }
+                complete = true;
+                activity.runOnUiThread(callback);
+            }
+        }
+
+        MapToJSONTask mapToJSONTask = new MapToJSONTask(givenPath, givenMap, givenCallback, givenActivity);
+        mapToJSONTask.start();
+        return mapToJSONTask;
     }
 }
