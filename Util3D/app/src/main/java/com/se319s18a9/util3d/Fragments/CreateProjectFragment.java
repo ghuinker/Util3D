@@ -24,6 +24,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.se319s18a9.util3d.R;
 import com.se319s18a9.util3d.backend.User;
 import com.se319s18a9.util3d.database.StoreJSON;
+import com.se319s18a9.util3d.database.StoreProject;
 
 import java.util.ArrayList;
 
@@ -42,8 +43,6 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
     private String projectName;
     private String location;
 
-    private String JSONString = "test"; //Need JSON String from Mason
-
     private DatabaseReference databaseReference;
     private FirebaseAuth mAuth;
 
@@ -51,17 +50,16 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
         // Empty constructor
     }
 
-    public void saveJSON() {
+    public void saveProject() {
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
         String projectname = projectNameEditText.getText().toString().trim();
         String orginizationname = organizationEditText.getText().toString().trim();
         String locationname = locationEditText.getText().toString().trim();
-        String json = JSONString.trim();
 
-        StoreJSON storeJSON = new StoreJSON(projectname, orginizationname, locationname, json);
-        
+        StoreProject storeJSON = new StoreProject(projectname, orginizationname, locationname);
+
         databaseReference.child(User.getInstance().getUserID()).child("Projects").child(getProjectName()).setValue(storeJSON);
 
         //Toast.makeText(this, "Information Updated",Toast.LENGTH_LONG).show();
@@ -164,7 +162,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
                 fragmentTransaction.replace(R.id.activity_main_frameLayout_root, mapFragment);
                 fragmentTransaction.addToBackStack(null).commit();
                 //TODO: Why is this here?
-                saveJSON();
+                saveProject();
 
             break;
 

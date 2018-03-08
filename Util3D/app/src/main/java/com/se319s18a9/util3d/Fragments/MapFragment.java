@@ -19,12 +19,17 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
 import com.se319s18a9.util3d.R;
 import com.se319s18a9.util3d.backend.ConnectedPoint;
 import com.se319s18a9.util3d.backend.CustomAsyncTask;
 import com.se319s18a9.util3d.backend.Line;
 import com.se319s18a9.util3d.backend.Map;
 import com.se319s18a9.util3d.backend.User;
+import com.se319s18a9.util3d.database.StoreJSON;
+import com.se319s18a9.util3d.database.StoreProject;
 
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -54,6 +59,7 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     CustomAsyncTask customDownload;
     LoadingDialogFragment loadingDialogFragment;
     String filename;
+    private DatabaseReference databaseReference;
 
     FloatingActionButton myLocationFab;
 
@@ -82,6 +88,16 @@ public class MapFragment extends Fragment implements View.OnClickListener {
 
     public MapFragment() {
         // Empty constructor
+    }
+
+    public void saveJSON(){
+            databaseReference = FirebaseDatabase.getInstance().getReference();
+
+            StoreJSON storeJSON = new StoreJSON(User.getInstance().getURL());
+
+            databaseReference.child(User.getInstance().getUserID()).child("Projects").child("JSON URL:").setValue(storeJSON);
+
+            //Toast.makeText(this, "Information Updated",Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -460,9 +476,12 @@ public class MapFragment extends Fragment implements View.OnClickListener {
             if(exitAfterSave) {
                 messageArgument.putString("message", "Saving and exiting");
                 customUpload = User.getInstance().writeMapToFirebaseStorage(filename, graph, this::saveAndExitCallback, getActivity());
+                saveJSON();
+
             }else{
                 messageArgument.putString("message", "Saving map");
                 customUpload = User.getInstance().writeMapToFirebaseStorage(filename, graph, this::saveCallback, getActivity());
+                saveJSON();
             }
             loadingDialogFragment.setArguments(messageArgument);
             loadingDialogFragment.show(getActivity().getFragmentManager(), null);

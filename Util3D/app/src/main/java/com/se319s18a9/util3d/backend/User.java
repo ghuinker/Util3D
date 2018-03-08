@@ -1,10 +1,13 @@
 package com.se319s18a9.util3d.backend;
 
 import android.app.Activity;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.EmailAuthProvider;
@@ -22,17 +25,22 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.se319s18a9.util3d.database.StoreJSON;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.Executor;
 
 public class User {
     private static final User instance = new User();
     private FirebaseAuth mAuth;
     private FirebaseDatabase mDatabase;
+    private String JSONString;
 
     public User() {
         mAuth = FirebaseAuth.getInstance();
@@ -480,5 +488,9 @@ public class User {
         MapToJSONTask mapToJSONTask = new MapToJSONTask(givenPath, givenMap, givenCallback, givenActivity);
         mapToJSONTask.start();
         return mapToJSONTask;
+    }
+
+    public String getURL(){
+        return JSONString;
     }
 }
