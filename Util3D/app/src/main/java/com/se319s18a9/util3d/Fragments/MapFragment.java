@@ -129,7 +129,7 @@ public class MapFragment extends Fragment implements View.OnClickListener {
 
         // Set toolbar title
         final Bundle bundle = getArguments();
-        getActivity().setTitle(bundle.getString("ProjectName"));
+        getActivity().setTitle(bundle.getString("ProjectName") + ".json");
 
         // Initialize local variables
 
