@@ -20,7 +20,12 @@ import com.se319s18a9.util3d.R;
 import com.se319s18a9.util3d.backend.Project;
 import com.se319s18a9.util3d.backend.User;
 
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by ghuin on 3/1/2018.
@@ -75,22 +80,11 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
 
         listView = (ListView) v.findViewById(R.id.fragment_openproject_listview);
 
-        //Project[] values = new Project[] {
-        //        new Project("First Name", new Date(2018,3,4), new Date(2018, 3, 6), null),
-        //        new Project("Second Name", new Date(2018, 3, 5), new Date(2018, 3, 6), null)
-        //};
-
-        //final ArrayList<Project> list = new ArrayList<Project>();
-        //for (int i = 0; i < values.length; ++i) {
-        //    list.add(values[i]);
-        //}
-
         adapter = new ListViewAdapter(v.getContext(), projects, 0);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //Toast.makeText(getContext(), adapterView.getItemAtPosition(i).toString(), Toast.LENGTH_SHORT).show();
                 Fragment mapFragment = new MapFragment();
                 Bundle bundle = new Bundle();
                 bundle.putBoolean("LoadMap", true);
@@ -161,9 +155,13 @@ public class OpenProjectFragment  extends Fragment implements View.OnClickListen
                 TextView itemCreated = (TextView) view.findViewById(R.id.fragment_openproject_detailcreated);
                 TextView itemModified = (TextView) view.findViewById(R.id.fragment_openproject_detailmodified);
 
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+
+
                 itemName.setText(list.get(i).name);
-                itemCreated.setText(list.get(i).created.toString());
-                itemModified.setText(list.get(i).modified.toString());
+                itemCreated.setText(dateFormat.format(list.get(i).created));
+                itemModified.setText(dateFormat.format(list.get(i).modified));
 
             }
 

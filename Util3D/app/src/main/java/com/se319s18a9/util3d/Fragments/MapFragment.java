@@ -235,8 +235,13 @@ public class MapFragment extends Fragment implements View.OnClickListener {
                     Toast.makeText(getContext(), "Map Type: Normal", Toast.LENGTH_SHORT).show();
                 }
                 return true;
+            case R.id.fragment_map_menu_save:
+                dialogSaveHelper(null, filename, false);
+                return true;
+            case R.id.fragment_map_menu_exit:
+                saveWithDialog(true);
+                return true;
             default:
-                Toast.makeText(getActivity(), "Something happened", Toast.LENGTH_SHORT).show();
                 return false;
 
         }
@@ -425,7 +430,7 @@ public class MapFragment extends Fragment implements View.OnClickListener {
             loadingDialogFragment = null;
             temp.dismiss();
             Toast.makeText(getContext(), "Failed to load map. Encountered the following exception: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            getActivity().getSupportFragmentManager().popBackStackImmediate();
+            getActivity().getSupportFragmentManager().popBackStack();
         }
     }
 
@@ -445,14 +450,17 @@ public class MapFragment extends Fragment implements View.OnClickListener {
             Toast.makeText(getContext(), "Upload Failed", Toast.LENGTH_LONG).show();
         }
         else if(saveAndExit){
-            getActivity().getSupportFragmentManager().popBackStackImmediate("dashboardIdentifier", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            getActivity().getSupportFragmentManager().popBackStack();
         }
     }
 
     private void dialogSaveHelper(AlertDialog dialog, String newFilename, boolean exitAfterSave)
     {
         filename = newFilename;
-        dialog.dismiss();
+        if(dialog != null) {
+            dialog.dismiss();
+        }
+
         try{
             loadingDialogFragment = new LoadingDialogFragment();
             loadingDialogFragment.setCancelable(false);
@@ -498,7 +506,7 @@ public class MapFragment extends Fragment implements View.OnClickListener {
                 .setNegativeButton("No",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                getActivity().getSupportFragmentManager().popBackStackImmediate("dashboardIdentifier", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                getActivity().getSupportFragmentManager().popBackStack();
                             }
                         });
         final AlertDialog alertDialog = alertDialogBuilder.create();

@@ -160,6 +160,7 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
                 bundle.putStringArrayList("UtilitiesUsed", utilitiesUsed);
                 mapFragment.setArguments(bundle);
                 fragmentManager = getActivity().getSupportFragmentManager();
+                fragmentManager.popBackStack();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.activity_main_frameLayout_root, mapFragment);
                 fragmentTransaction.addToBackStack(null).commit();

@@ -11,5 +11,13 @@
         android:id="@+id/fragment_map_menu_togglemaptype"
         android:title="@string/s_fragment_map_menu_togglemaptype"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/fragment_map_menu_save"
+        android:title="Save Project"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/fragment_map_menu_exit"
+        android:title="Exit"
+        app:showAsAction="never"/>
 
 </menu>
