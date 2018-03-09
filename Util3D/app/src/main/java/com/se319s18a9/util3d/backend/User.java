@@ -27,6 +27,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.se319s18a9.util3d.Fragments.CreateProjectFragment;
 import com.se319s18a9.util3d.database.StoreJSON;
 
 import org.json.JSONException;
@@ -36,11 +37,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.Executor;
 
-public class User {
+public class User{
     private static final User instance = new User();
     private FirebaseAuth mAuth;
     private FirebaseDatabase mDatabase;
     private String JSONString;
+    private DatabaseReference databaseReference;
+    private int count = 1;
 
     public User() {
         mAuth = FirebaseAuth.getInstance();
@@ -475,6 +478,16 @@ public class User {
                     if(exception!=null) {
                         throw exception;
                     }
+                    StorageReference storageRef = FirebaseStorage.getInstance().getReference("/users/"+mAuth.getUid()+"/files/"+path);
+                    UploadTask uploadTask = storageRef.putBytes(json);
+                    uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Uri url = taskSnapshot.getDownloadUrl();
+                            JSONString = url.toString();
+                            saveJSON();
+                        }
+                    });
                     successful = true;
                 }catch(Exception e){
                     exception = e;
@@ -484,10 +497,20 @@ public class User {
                 activity.runOnUiThread(callback);
             }
         }
-
         MapToJSONTask mapToJSONTask = new MapToJSONTask(givenPath, givenMap, givenCallback, givenActivity);
         mapToJSONTask.start();
         return mapToJSONTask;
+    }
+
+    public void saveJSON(){
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        StoreJSON storeJSON = new StoreJSON(User.getInstance().getURL());
+
+        databaseReference.child(User.getInstance().getUserID()).child("Projects").child("JSON" + count).child("Json URL:").setValue(storeJSON);
+        count++;
+
+        //Toast.makeText(this, "Information Updated",Toast.LENGTH_LONG).show();
     }
 
     public String getURL(){

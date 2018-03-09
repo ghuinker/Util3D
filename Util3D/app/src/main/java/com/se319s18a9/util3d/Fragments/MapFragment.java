@@ -50,7 +50,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class MapFragment extends Fragment implements View.OnClickListener {
+public class MapFragment extends Fragment implements View.OnClickListener{
 
     MapView mMapView;
     private GoogleMap googleMap;
@@ -59,7 +59,6 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     CustomAsyncTask customDownload;
     LoadingDialogFragment loadingDialogFragment;
     String filename;
-    private DatabaseReference databaseReference;
 
     FloatingActionButton myLocationFab;
 
@@ -75,6 +74,8 @@ public class MapFragment extends Fragment implements View.OnClickListener {
     FloatingActionButton utilityTypeFab;
     FloatingActionButton trackingFab;
 
+    private DatabaseReference databaseReference;
+
     public enum UtilityType {
         WATER, GAS, ELECTRIC, SEWAGE
     }
@@ -88,16 +89,6 @@ public class MapFragment extends Fragment implements View.OnClickListener {
 
     public MapFragment() {
         // Empty constructor
-    }
-
-    public void saveJSON(){
-            databaseReference = FirebaseDatabase.getInstance().getReference();
-
-            StoreJSON storeJSON = new StoreJSON(User.getInstance().getURL());
-
-            databaseReference.child(User.getInstance().getUserID()).child("Projects").child("JSON URL:").setValue(storeJSON);
-
-            //Toast.makeText(this, "Information Updated",Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -476,12 +467,10 @@ public class MapFragment extends Fragment implements View.OnClickListener {
             if(exitAfterSave) {
                 messageArgument.putString("message", "Saving and exiting");
                 customUpload = User.getInstance().writeMapToFirebaseStorage(filename, graph, this::saveAndExitCallback, getActivity());
-                saveJSON();
 
             }else{
                 messageArgument.putString("message", "Saving map");
                 customUpload = User.getInstance().writeMapToFirebaseStorage(filename, graph, this::saveCallback, getActivity());
-                saveJSON();
             }
             loadingDialogFragment.setArguments(messageArgument);
             loadingDialogFragment.show(getActivity().getFragmentManager(), null);

@@ -42,7 +42,6 @@ public class CreateProjectFragment extends Fragment implements View.OnClickListe
     private String organization;
     private String projectName;
     private String location;
-
     private DatabaseReference databaseReference;
     private FirebaseAuth mAuth;
 
