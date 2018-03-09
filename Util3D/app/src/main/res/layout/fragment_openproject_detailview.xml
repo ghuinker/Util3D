@@ -5,7 +5,7 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
@@ -13,7 +13,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/fragment_openproject_detailname"
-            android:gravity="left"/>
+            android:gravity="left"
+            android:textSize="22sp"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -24,15 +25,17 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginRight="6dp"
-        android:layout_marginLeft="6dp">
+        android:layout_marginLeft="6dp"
+        android:weightSum="2">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:id="@+id/fragment_openproject_detailcreated" />
 
         <TextView
