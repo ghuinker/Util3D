@@ -96,15 +96,13 @@ public class CreateAccountFragment extends Fragment implements View.OnClickListe
                     try {
                         User.getInstance().createAccount(getEditTextValue(emailEditText), getEditTextValue(passwordEditText));
                         saveUser();
-
                         if(!getEditTextValue(usernameEditText).isEmpty()) {
                             User.getInstance().changeDisplayName(getEditTextValue(usernameEditText));
                         }
+                        getActivity().getSupportFragmentManager().popBackStackImmediate();
                     } catch(Exception e) {
                         Toast.makeText(this.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
-
-                    getActivity().getSupportFragmentManager().popBackStackImmediate();
                 } else {
                     Toast.makeText(v.getContext(), R.string.s_fragment_createAccount_errorMessage_PasswordsNotMatching, Toast.LENGTH_SHORT).show();
                 }
